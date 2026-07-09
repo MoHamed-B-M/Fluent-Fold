@@ -123,9 +123,6 @@ jobs:
     name: Build Installer (.msi)
     needs: build-windows
     runs-on: windows-latest
-    defaults:
-      run:
-        working-directory: ${{ env.PROJECT_DIR }}
 
     steps:
       - name: Checkout source code
@@ -135,13 +132,15 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: ${{ env.APP_NAME }}-windows-x64-build
-          path: dist/${{ env.APP_NAME }}/
+          path: ${{ github.workspace }}/${{ env.PROJECT_DIR }}/dist/${{ env.APP_NAME }}/
 
       - name: Install WiX Toolset
         run: choco install wixtoolset --force -y --no-progress
+        working-directory: ${{ env.PROJECT_DIR }}
 
       - name: Collect version
         id: version
+        working-directory: ${{ env.PROJECT_DIR }}
         run: |
           $tag = git describe --tags --always --abbrev=0 2>$null
           if (-not $tag) { $tag = "1.0.0" }
@@ -150,6 +149,7 @@ jobs:
           Write-Host "Version: $tag"
 
       - name: Build MSI installer
+        working-directory: ${{ env.PROJECT_DIR }}
         run: |
           $srcDir = (Get-Item "dist/${{ env.APP_NAME }}").FullName
           $version = "${{ steps.version.outputs.VERSION }}"
@@ -159,7 +159,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.APP_NAME }}-windows-x64-installer
-          path: ${{ env.PROJECT_DIR }}/dist/${{ env.APP_NAME }}-*.msi
+          path: ${{ github.workspace }}/${{ env.PROJECT_DIR }}/dist/${{ env.APP_NAME }}-*.msi
           if-no-files-found: warn
 
   # ---------------------------------------------------------------------------
