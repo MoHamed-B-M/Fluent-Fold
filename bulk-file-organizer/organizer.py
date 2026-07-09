@@ -14,7 +14,8 @@ class FileOrganizer:
             'Archives': ['.zip', '.rar', '.7z', '.tar', '.gz', '.bz2', '.iso'],
             'Code': ['.py', '.java', '.cpp', '.c', '.h', '.js', '.ts', '.go', '.rs', '.rb', '.php', '.sql', '.sh', '.bat', '.ps1']
         }
-        self._operation_history = []  # single stack of (type, list_of_moves)
+        self.undo_history = []
+        self.rename_history = []
 
     def organize_by_type(self, folder_path):
         folder_path = Path(folder_path)
@@ -25,7 +26,6 @@ class FileOrganizer:
             (folder_path / category).mkdir(exist_ok=True)
 
         organized_files = {'moved': [], 'total': 0}
-        moves = []
 
         for item in folder_path.iterdir():
             if item.is_file():
@@ -38,7 +38,7 @@ class FileOrganizer:
                         if destination.exists():
                             destination = self._handle_duplicate(destination)
                         shutil.move(str(item), str(destination))
-                        moves.append({'original': str(item), 'destination': str(destination)})
+                        self.undo_history.append({'original': str(item), 'destination': str(destination)})
                         organized_files['moved'].append({'from': item.name, 'to': str(destination)})
                         organized_files['total'] += 1
                         moved = True
@@ -51,12 +51,10 @@ class FileOrganizer:
                     if destination.exists():
                         destination = self._handle_duplicate(destination)
                     shutil.move(str(item), str(destination))
-                    moves.append({'original': str(item), 'destination': str(destination)})
+                    self.undo_history.append({'original': str(item), 'destination': str(destination)})
                     organized_files['moved'].append({'from': item.name, 'to': str(destination)})
                     organized_files['total'] += 1
 
-        if moves:
-            self._operation_history.append(('organize', moves))
         return organized_files
 
     def rename_files(self, folder_path, pattern, start_num=1):
@@ -67,7 +65,6 @@ class FileOrganizer:
         renamed_files = {'renamed': [], 'total': 0}
         files = [f for f in folder_path.iterdir() if f.is_file()]
         files.sort()
-        moves = []
 
         for index, file_path in enumerate(files, start=start_num):
             extension = file_path.suffix
@@ -79,14 +76,11 @@ class FileOrganizer:
                 new_name = f"{pattern}_{str(index).zfill(padding)}_copy{extension}"
                 new_path = folder_path / new_name
 
-            original_path = str(file_path)
             file_path.rename(new_path)
-            moves.append({'original': original_path, 'new': str(new_path)})
+            self.rename_history.append({'original': str(file_path), 'new': str(new_path)})
             renamed_files['renamed'].append({'from': file_path.name, 'to': new_name})
             renamed_files['total'] += 1
 
-        if moves:
-            self._operation_history.append(('rename', moves))
         return renamed_files
 
     def _handle_duplicate(self, destination):
@@ -99,29 +93,32 @@ class FileOrganizer:
         return destination
 
     def undo_last_operation(self):
-        if not self._operation_history:
-            return {'success': False, 'message': 'Nothing to undo'}
-
-        op_type, moves = self._operation_history.pop()
-        undone = 0
-
-        if op_type == 'organize':
-            for action in reversed(moves):
+        if self.undo_history:
+            parents = set()
+            for action in self.undo_history:
                 original = Path(action['original'])
                 destination = Path(action['destination'])
                 if destination.exists():
                     shutil.move(str(destination), str(original))
-                    undone += 1
-
-        elif op_type == 'rename':
-            for action in reversed(moves):
+                    parents.add(destination.parent)
+            for parent in parents:
+                if parent.exists() and not any(parent.iterdir()):
+                    try:
+                        parent.rmdir()
+                    except OSError:
+                        pass
+            self.undo_history.clear()
+            return {'success': True, 'message': 'Undo successful'}
+        elif self.rename_history:
+            for action in reversed(self.rename_history):
                 original = Path(action['original'])
                 new = Path(action['new'])
                 if new.exists():
                     new.rename(original)
-                    undone += 1
-
-        return {'success': undone > 0, 'message': f'Undo successful: {undone} file(s) reverted'}
+            self.rename_history.clear()
+            return {'success': True, 'message': 'Undo successful'}
+        else:
+            return {'success': False, 'message': 'Nothing to undo'}
 
     def get_folder_summary(self, folder_path):
         folder_path = Path(folder_path)

@@ -1,7 +1,7 @@
 # =============================================================================
-# Build MSI Installer for Bulk File Organizer
+# Build MSI Installer for Fluent Fold
 # Requires: WiX Toolset v3.14+ (choco install wixtoolset)
-# Usage: .\build_msi.ps1 -SourceDir "dist\BulkFileOrganizer" -Version "1.0.0"
+# Usage: .\build_msi.ps1 -SourceDir "dist\FluentFold" -Version "1.0.0"
 # =============================================================================
 
 param(
@@ -16,7 +16,7 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
-$AppName = "BulkFileOrganizer"
+$AppName = "FluentFold"
 
 if (-not $OutputDir) {
     $OutputDir = (Get-Item $SourceDir).Parent.FullName
@@ -98,7 +98,7 @@ $wxsContent = @"
              Name="$AppName"
              Language="1033"
              Version="$Version"
-             Manufacturer="Bulk File Organizer"
+             Manufacturer="Fluent Fold"
              UpgradeCode="$guid">
         <Package InstallerVersion="200"
                  Compressed="yes"

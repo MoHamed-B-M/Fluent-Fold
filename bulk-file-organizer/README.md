@@ -1,4 +1,4 @@
-# fluent Fold 📁
+# Bulk File Organizer 📁
 
 A modern, lightweight desktop application for organizing and renaming files in bulk. Built with **PySide6** and **qfluentwidgets** (Microsoft Fluent Design System for Qt), featuring a beautiful, responsive UI that works seamlessly on Windows, Linux, and macOS.
 

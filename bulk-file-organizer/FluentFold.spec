@@ -64,7 +64,7 @@ exe = EXE(
     a.zipfiles,
     a.datas,
     [],
-    name='BulkFileOrganizer',
+    name='FluentFold',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
@@ -90,5 +90,5 @@ coll = COLLECT(
     strip=False,
     upx=True,
     upx_exclude=[],
-    name='BulkFileOrganizer',
+    name='FluentFold',
 )

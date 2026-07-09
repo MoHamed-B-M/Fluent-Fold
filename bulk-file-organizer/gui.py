@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Bulk File Organizer - Fluent Design GUI
+Fluent Fold - Fluent Design GUI
 Built with PySide6 and qfluentwidgets (PyQt-Fluent-Widgets)
 """
 
@@ -174,7 +174,7 @@ class FileOrganizerGUI(FluentWindow):
         self.worker = None
         
         # Setup window
-        self.setWindowTitle("Bulk File Organizer - Fluent Design")
+        self.setWindowTitle("Fluent Fold")
         self.resize(1000, 700)
         self.setMinimumSize(900, 600)
         
@@ -292,8 +292,8 @@ class HomeInterface(ScrollArea):
     def _setup_ui(self):
         # Header
         header_layout = QHBoxLayout()
-        title = TitleLabel("Bulk File Organizer")
-        subtitle = BodyLabel("Organize and rename files in bulk with Fluent Design")
+        title = TitleLabel("Fluent Fold")
+        subtitle = BodyLabel("Organize and rename files in bulk")
         subtitle.setStyleSheet("color: #888; margin-top: -8px;")
         
         header_vbox = QVBoxLayout()
@@ -446,7 +446,7 @@ class HomeInterface(ScrollArea):
         self.main_layout.addStretch()
         
         # Footer
-        footer = BodyLabel("Made with ❤️ for modern desktops using PySide6 & qfluentwidgets")
+        footer = BodyLabel("Fluent Fold - Made with ❤️ using PySide6 & qfluentwidgets")
         footer.setAlignment(Qt.AlignCenter)
         footer.setStyleSheet("color: #888; padding: 10px;")
         self.main_layout.addWidget(footer)
@@ -695,7 +695,7 @@ class SettingsInterface(ScrollArea):
         about_layout.addWidget(about_title)
         
         about_text = BodyLabel(
-            "<b>Bulk File Organizer</b> v1.0.0<br>"
+            "<b>Fluent Fold</b> v1.0.0<br>"
             "A modern file organization tool built with PySide6 and qfluentwidgets.<br><br>"
             "Features:<br>"
             "• Organize files by type (Images, Documents, Videos, Audio, Archives, Code, Others)<br>"
@@ -703,7 +703,7 @@ class SettingsInterface(ScrollArea):
             "• Undo last operation (organize or rename)<br>"
             "• Real-time folder summary<br>"
             "• Fluent Design UI with dark/light theme support<br><br>"
-            "Built with ❤️ using Python, PySide6, and qfluentwidgets"
+            "Fluent Fold - Built with ❤️ using Python, PySide6, and qfluentwidgets"
         )
         about_text.setWordWrap(True)
         about_text.setTextFormat(Qt.RichText)

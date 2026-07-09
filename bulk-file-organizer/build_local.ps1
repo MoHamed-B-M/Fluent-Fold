@@ -21,19 +21,20 @@ param(
 
 $ErrorActionPreference = "Stop"
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-$AppName = "BulkFileOrganizer"
+$AppName = "FluentFold"
 $Version = "1.0.0"
 
 # Try to get version from git tag
 try {
-    $tag = git -C $ScriptDir describe --tags --always --abbrev=0 2>$null
+    $tag = git -C $ScriptDir describe --tags --abbrev=0 2>$null
     if ($tag -and ($tag -match '^v(.+)$')) {
-        $Version = $matches[1]
+        $v = $matches[1]
+        if ($v -match '^\d+\.\d+\.\d+(\.\d+)?$') { $Version = $v }
     }
 } catch {}
 
 Write-Host "==============================" -ForegroundColor Cyan
-Write-Host " Bulk File Organizer Builder" -ForegroundColor Cyan
+Write-Host " Fluent Fold Builder" -ForegroundColor Cyan
 Write-Host " Version: $Version" -ForegroundColor Cyan
 Write-Host "==============================" -ForegroundColor Cyan
 Write-Host ""

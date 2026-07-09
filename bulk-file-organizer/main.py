@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Bulk File Organizer - Modern Fluent Design Edition
+Fluent Fold - Modern Fluent Design Edition
 
 A lightweight desktop application that organizes and renames files in bulk.
 Built with PySide6 and qfluentwidgets (Fluent Design).
