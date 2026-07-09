@@ -42,8 +42,8 @@ jobs:
             Export-PfxCertificate -FilePath "FluentFoldPackage\FluentFoldPackage_TemporaryKey.pfx" `
             -Password (ConvertTo-SecureString -String "" -Force -AsPlainText)
 
-      - name: Restore main project
-        run: dotnet restore FluentFold/FluentFold.csproj
+      - name: Restore solution
+        run: dotnet restore
 
       - name: Build MSIX package
         run: |
