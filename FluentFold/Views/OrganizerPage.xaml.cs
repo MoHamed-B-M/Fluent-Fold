@@ -1,95 +1,169 @@
 using FluentFold.ViewModels;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Windows.Storage.Pickers;
+using Windows.Storage;
+using WinRT.Interop;
 
 namespace FluentFold.Views;
 
 public sealed partial class OrganizerPage : Page
 {
-    public OrganizerViewModel ViewModel { get; }
+    public OrganizerViewModel ViewModel { get; } = new();
 
     public OrganizerPage()
     {
-        ViewModel = App.GetService<OrganizerViewModel>();
-        InitializeComponent();
+        this.InitializeComponent();
     }
 
-    private void OnLoaded(object sender, RoutedEventArgs e)
+    private async void OnPickFolder(object sender, RoutedEventArgs e)
     {
-        // Initial setup if needed
-    }
-
-    private async void OnRenameClick(object sender, RoutedEventArgs e)
-    {
-        if (ViewModel.IsBusy) return;
-
-        var dialog = new ContentDialog
+        var picker = new Windows.Storage.Pickers.FolderPicker
         {
-            Title = "Bulk Rename Files",
-            PrimaryButtonText = "Rename",
-            CloseButtonText = "Cancel",
-            DefaultButton = ContentDialogButton.Primary,
-            XamlRoot = this.XamlRoot
+            SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.Desktop
         };
+        picker.FileTypeFilter.Add("*");
 
-        var panel = new StackPanel
+        var hwnd = WindowNative.GetWindowHandle(App.MainWindow);
+        InitializeWithWindow.Initialize(picker, hwnd);
+
+        var folder = await picker.PickSingleFolderAsync();
+        if (folder != null)
         {
-            Spacing = 16,
-            Padding = new Thickness(0, 8, 0, 0)
-        };
-
-        var patternBox = new TextBox
-        {
-            Header = "Name Pattern",
-            PlaceholderText = "e.g., photo, document, file",
-            Text = "file"
-        };
-
-        var numberBox = new NumberBox
-        {
-            Header = "Starting Number",
-            Minimum = 1,
-            Maximum = 999999,
-            SmallChange = 1,
-            LargeChange = 10,
-            Value = 1,
-            SpinButtonPlacementMode = NumberBoxSpinButtonPlacementMode.Compact
-        };
-
-        var preview = new TextBlock
-        {
-            Text = "Preview: file_001.ext, file_002.ext, ...",
-            Opacity = 0.6,
-            FontSize = 12,
-            Margin = new Thickness(0, -4, 0, 0)
-        };
-
-        void UpdatePreview()
-        {
-            var p = patternBox.Text;
-            if (string.IsNullOrWhiteSpace(p)) p = "file";
-            var digits = numberBox.Value.ToString().Length + 2;
-            if (digits < 3) digits = 3;
-            preview.Text = $"Preview: {p}_{"1".PadLeft(digits, '0')}.ext, {p}_{"2".PadLeft(digits, '0')}.ext, ...";
-        }
-
-        patternBox.TextChanged += (_, _) => UpdatePreview();
-        UpdatePreview();
-
-        panel.Children.Add(patternBox);
-        panel.Children.Add(numberBox);
-        panel.Children.Add(preview);
-        dialog.Content = panel;
-
-        var result = await dialog.ShowAsync();
-        if (result == ContentDialogResult.Primary)
-        {
-            var pattern = patternBox.Text.Trim();
-            if (string.IsNullOrWhiteSpace(pattern))
-                pattern = "file";
-            var startNum = (int)numberBox.Value;
-            await ViewModel.RenameFilesWithOptions(pattern, startNum);
+            ViewModel.SelectedFolderPath = folder.Path;
+            FolderPathText.Text = folder.Path;
+            OptionsPanel.Visibility = Visibility.Visible;
+            await LoadSummaryAsync(folder);
         }
     }
+
+    private async Task LoadSummaryAsync(StorageFolder folder)
+    {
+        ViewModel.IsWorking = true;
+        ProgressControl.IsActive = true;
+        ProgressControl.Visibility = Visibility.Visible;
+
+        try
+        {
+            var summary = await ViewModel._organizer.GetFolderSummaryAsync(folder);
+            ViewModel.FolderSummary = summary;
+            ViewModel.CategoryItems.Clear();
+            foreach (var kvp in summary.CategoryCounts)
+            {
+                ViewModel.CategoryItems.Add(new CategoryCountItem
+                {
+                    CategoryName = kvp.Key.ToString(),
+                    Count = kvp.Value
+                });
+            }
+            CategoryList.ItemsSource = ViewModel.CategoryItems;
+            SummaryHeader.Visibility = Visibility.Visible;
+            CategoryList.Visibility = Visibility.Visible;
+        }
+        finally
+        {
+            ViewModel.IsWorking = false;
+            ProgressControl.IsActive = false;
+            ProgressControl.Visibility = Visibility.Collapsed;
+        }
+    }
+
+    private void OnRenameToggled(object sender, RoutedEventArgs e)
+    {
+        PatternBox.IsEnabled = RenameToggle.IsOn;
+        ViewModel.RenameFiles = RenameToggle.IsOn;
+    }
+
+    private async void OnOrganize(object sender, RoutedEventArgs e)
+    {
+        if (string.IsNullOrWhiteSpace(ViewModel.SelectedFolderPath))
+        {
+            ShowInfoBar("Please select a folder first.", InfoBarSeverity.Warning);
+            return;
+        }
+
+        ViewModel.OrganizeByCategory = OrganizeToggle.IsOn;
+        ViewModel.RenamePattern = PatternBox.Text;
+
+        ViewModel.IsWorking = true;
+        ProgressControl.IsActive = true;
+        ProgressControl.Visibility = Visibility.Visible;
+        ViewModel.CanUndo = false;
+
+        try
+        {
+            var folder = await StorageFolder.GetFolderFromPathAsync(ViewModel.SelectedFolderPath);
+            var result = await ViewModel._organizer.OrganizeFolderAsync(
+                folder, ViewModel.RenamePattern, ViewModel.OrganizeByCategory, ViewModel.RenameFiles);
+
+            if (result.Success)
+            {
+                ShowInfoBar(result.Message, InfoBarSeverity.Success);
+                ViewModel.CanUndo = true;
+                UndoButton.IsEnabled = true;
+                await LoadSummaryAsync(folder);
+            }
+            else
+            {
+                ShowInfoBar(result.Message, InfoBarSeverity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            ShowInfoBar($"Error: {ex.Message}", InfoBarSeverity.Error);
+        }
+        finally
+        {
+            ViewModel.IsWorking = false;
+            ProgressControl.IsActive = false;
+            ProgressControl.Visibility = Visibility.Collapsed;
+        }
+    }
+
+    private async void OnUndo(object sender, RoutedEventArgs e)
+    {
+        ViewModel.IsWorking = true;
+        ProgressControl.IsActive = true;
+        ProgressControl.Visibility = Visibility.Visible;
+
+        try
+        {
+            var success = await ViewModel._undo.UndoAsync();
+            if (success)
+            {
+                ShowInfoBar("Undo completed successfully.", InfoBarSeverity.Success);
+                ViewModel.CanUndo = false;
+                UndoButton.IsEnabled = false;
+                if (!string.IsNullOrWhiteSpace(ViewModel.SelectedFolderPath))
+                {
+                    var folder = await StorageFolder.GetFolderFromPathAsync(ViewModel.SelectedFolderPath);
+                    await LoadSummaryAsync(folder);
+                }
+            }
+            else
+            {
+                ShowInfoBar("Nothing to undo.", InfoBarSeverity.Informational);
+            }
+        }
+        finally
+        {
+            ViewModel.IsWorking = false;
+            ProgressControl.IsActive = false;
+            ProgressControl.Visibility = Visibility.Collapsed;
+        }
+    }
+
+    private void ShowInfoBar(string message, InfoBarSeverity severity)
+    {
+        InfoBarControl.Message = message;
+        InfoBarControl.Severity = (Microsoft.UI.Xaml.Controls.InfoBarSeverity)severity;
+        InfoBarControl.IsOpen = true;
+    }
+}
+
+public enum InfoBarSeverity
+{
+    Informational = 0,
+    Success = 1,
+    Warning = 2,
+    Error = 3
 }

@@ -5,7 +5,7 @@
   xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
   IgnorableNamespaces="uap rescap">
 
-  <Identity Name="FluentFold.App" Publisher="CN=FluentFold" Version="1.0.0.0" />
+  <Identity Name="FluentFold" Publisher="CN=User" Version="1.0.0.0" ProcessorArchitecture="neutral" />
 
   <Properties>
     <DisplayName>Fluent Fold</DisplayName>
@@ -26,11 +26,11 @@
     <Application Id="App" Executable="$targetnametoken$.exe" EntryPoint="$targetentrypoint$">
       <uap:VisualElements
         DisplayName="Fluent Fold"
-        Description="Organize and rename files in bulk with Fluent Design"
+        Description="Organize your files with ease."
         Square150x150Logo="Assets\Square150x150Logo.png"
         Square44x44Logo="Assets\Square44x44Logo.png"
         BackgroundColor="transparent">
-        <uap:DefaultTile Square71x71Logo="Assets\SmallTile.png" Wide310x150Logo="Assets\Wide310x150Logo.png" />
+        <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png" Square71x71Logo="Assets\SmallTile.png" />
         <uap:SplashScreen Image="Assets\SplashScreen.png" />
       </uap:VisualElements>
     </Application>
@@ -38,7 +38,5 @@
 
   <Capabilities>
     <rescap:Capability Name="runFullTrust" />
-    <Capability Name="internetClient" />
   </Capabilities>
-
 </Package>
