@@ -1,0 +1,24 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <SolidColorBrush x:Key="CardBackgroundBrush" Color="{ThemeResource CardBackgroundColor}" />
+    <SolidColorBrush x:Key="SummaryCardBackgroundBrush" Color="{ThemeResource CardBackgroundColor}" />
+
+    <!-- Light theme colors -->
+    <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Light">
+            <Color x:Key="CardBackgroundColor">#F3F3F3</Color>
+            <Color x:Key="SummaryCardBackgroundColor">#FFFFFF</Color>
+            <Color x:Key="HeaderTextColor">#202020</Color>
+            <Color x:Key="SubtextColor">#606060</Color>
+        </ResourceDictionary>
+
+        <ResourceDictionary x:Key="Dark">
+            <Color x:Key="CardBackgroundColor">#2C2C2C</Color>
+            <Color x:Key="SummaryCardBackgroundColor">#1F1F1F</Color>
+            <Color x:Key="HeaderTextColor">#E0E0E0</Color>
+            <Color x:Key="SubtextColor">#909090</Color>
+        </ResourceDictionary>
+    </ResourceDictionary.ThemeDictionaries>
+</ResourceDictionary>
