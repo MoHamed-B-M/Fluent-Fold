@@ -138,7 +138,7 @@ jobs:
           path: dist/${{ env.APP_NAME }}/
 
       - name: Install WiX Toolset
-        run: choco install wixtoolset --version 3.14.1 -y --no-progress
+        run: choco install wixtoolset --force -y --no-progress
 
       - name: Collect version
         id: version
@@ -242,7 +242,7 @@ jobs:
 
       - name: Run organizer tests
         run: |
-          python -c "
+          python -u -c "
           import tempfile, os
           from pathlib import Path
           from organizer import FileOrganizer
@@ -256,7 +256,8 @@ jobs:
               org = FileOrganizer()
 
               s = org.get_folder_summary(tmpdir)
-              assert s['total_files'] == 4, f'Expected 4, got {s[\"total_files\"]}'
+              total = s['total_files']
+              assert total == 4, 'Expected 4, got ' + str(total)
               assert s['categories'].get('Images', 0) == 2
               print('  OK get_folder_summary')
 
