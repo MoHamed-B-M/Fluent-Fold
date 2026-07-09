@@ -33,9 +33,28 @@ jobs:
       - name: Build
         run: dotnet build FluentFold/FluentFold.csproj -c ${{ env.CONFIGURATION }} --no-restore
 
-      - name: Upload build artifacts
+      - name: Locate and upload build artifacts
+        run: |
+          $paths = @(
+            "FluentFold/bin/x64/Release/net8.0-windows10.0.19041.0",
+            "FluentFold/bin/Release/net8.0-windows10.0.19041.0",
+            "FluentFold/bin/x64/Release/net8.0-windows10.0.19041.0/win10-x64"
+          )
+          $found = $false
+          foreach ($p in $paths) {
+            if (Test-Path $p) {
+              Write-Host "Found: $p"
+              Get-ChildItem $p -Recurse -File | Select-Object -First 20 | ForEach-Object { Write-Host "  $($_.Name)" }
+              $found = $true
+            }
+          }
+          if (-not $found) {
+            Get-ChildItem FluentFold/bin -Recurse -Directory | ForEach-Object { Write-Host "Dir: $($_.FullName)" }
+          }
+
+      - name: Upload build folder
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.APP_NAME }}-build
-          path: FluentFold/bin/x64/${{ env.CONFIGURATION }}/net8.0-windows10.0.19041.0/
-          if-no-files-found: warn
+          path: FluentFold/bin/
+          if-no-files-found: error
