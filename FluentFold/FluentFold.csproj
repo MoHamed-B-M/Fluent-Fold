@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <Content Include="Package.appxmanifest" />
+    <Content Include="Assets\**" />
   </ItemGroup>
 
   <ItemGroup>
