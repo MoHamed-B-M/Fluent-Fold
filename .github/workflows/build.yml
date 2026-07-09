@@ -1,0 +1,44 @@
+name: Build & Release
+
+on:
+  push:
+    branches: [main, master]
+    tags: ['v*']
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+env:
+  DOTNET_VERSION: '8.0.x'
+  CONFIGURATION: 'Release'
+  SOLUTION: 'FluentFold.sln'
+
+jobs:
+  build:
+    name: Build WinUI 3 App
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET ${{ env.DOTNET_VERSION }}
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Restore NuGet packages
+        run: nuget restore ${{ env.SOLUTION }}
+
+      - name: Build solution
+        run: msbuild ${{ env.SOLUTION }} /p:Configuration=${{ env.CONFIGURATION }} /p:Platform=x64 /p:AppxPackage=false /p:UapAppxPackageBuildMode=StoreUpload
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: FluentFold-x64-build
+          path: FluentFold/bin/x64/${{ env.CONFIGURATION }}/
+          if-no-files-found: warn
