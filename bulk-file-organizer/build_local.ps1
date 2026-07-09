@@ -26,11 +26,9 @@ $Version = "1.0.0"
 
 # Try to get version from git tag
 try {
-    $tag = git -C $ScriptDir describe --tags --abbrev=0 2>$null
-    if ($tag -and ($tag -match '^v(.+)$')) {
-        $v = $matches[1]
-        if ($v -match '^\d+\.\d+\.\d+(\.\d+)?$') { $Version = $v }
-    }
+    $tag = git -C $ScriptDir describe --tags --always --abbrev=0 2>$null
+    if ($tag -match '^v(.+)$') { $tag = $matches[1] }
+    if ($tag -match '^\d+\.\d+\.\d+(\.\d+)?$') { $Version = $tag }
 } catch {}
 
 Write-Host "==============================" -ForegroundColor Cyan

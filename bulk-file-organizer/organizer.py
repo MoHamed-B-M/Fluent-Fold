@@ -16,6 +16,7 @@ class FileOrganizer:
         }
         self.undo_history = []
         self.rename_history = []
+        self._op_stack = []
 
     def organize_by_type(self, folder_path):
         folder_path = Path(folder_path)
@@ -55,6 +56,8 @@ class FileOrganizer:
                     organized_files['moved'].append({'from': item.name, 'to': str(destination)})
                     organized_files['total'] += 1
 
+        if organized_files['total'] > 0:
+            self._op_stack.append('undo')
         return organized_files
 
     def rename_files(self, folder_path, pattern, start_num=1):
@@ -81,6 +84,8 @@ class FileOrganizer:
             renamed_files['renamed'].append({'from': file_path.name, 'to': new_name})
             renamed_files['total'] += 1
 
+        if renamed_files['total'] > 0:
+            self._op_stack.append('rename')
         return renamed_files
 
     def _handle_duplicate(self, destination):
@@ -93,7 +98,10 @@ class FileOrganizer:
         return destination
 
     def undo_last_operation(self):
-        if self.undo_history:
+        if not self._op_stack:
+            return {'success': False, 'message': 'Nothing to undo'}
+        last_op = self._op_stack.pop()
+        if last_op == 'undo':
             parents = set()
             for action in self.undo_history:
                 original = Path(action['original'])
@@ -109,7 +117,7 @@ class FileOrganizer:
                         pass
             self.undo_history.clear()
             return {'success': True, 'message': 'Undo successful'}
-        elif self.rename_history:
+        else:
             for action in reversed(self.rename_history):
                 original = Path(action['original'])
                 new = Path(action['new'])
@@ -117,8 +125,6 @@ class FileOrganizer:
                     new.rename(original)
             self.rename_history.clear()
             return {'success': True, 'message': 'Undo successful'}
-        else:
-            return {'success': False, 'message': 'Nothing to undo'}
 
     def get_folder_summary(self, folder_path):
         folder_path = Path(folder_path)
