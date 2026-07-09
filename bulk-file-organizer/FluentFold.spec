@@ -18,6 +18,7 @@ a = Analysis(
     binaries=[],
     datas=[
         ('organizer.py', '.'),
+        ('pyqt5_shim.py', '.'),
     ],
     hiddenimports=[
         'organizer',
@@ -29,16 +30,13 @@ a = Analysis(
         'PySide6.QtWidgets',
         'PySide6.QtNetwork',
         'shiboken6',
-        'PyQt5',
-        'PyQt5.QtCore',
-        'PyQt5.QtGui',
-        'PyQt5.QtWidgets',
-        'PyQt5.sip',
     ],
     hookspath=[],
     hooksconfig={},
-    runtime_hooks=[],
+    runtime_hooks=['pyqt5_shim.py'],
     excludes=[
+        'PyQt5', 'PyQt5.QtCore', 'PyQt5.QtGui', 'PyQt5.QtWidgets',
+        'PyQt5.sip', 'PyQt5.QtNetwork',
         'matplotlib', 'numpy', 'scipy', 'pandas', 'PIL', 'Pillow',
         'cv2', 'opencv', 'tensorflow', 'torch', 'sklearn',
         'IPython', 'jupyter', 'notebook', 'bokeh', 'plotly',

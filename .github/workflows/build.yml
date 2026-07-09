@@ -62,7 +62,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install git+https://github.com/zhiyiYo/PyQt-Fluent-Widgets.git
-          pip install PyQt5
           pip install pyinstaller
 
       - name: Verify imports
@@ -70,14 +69,7 @@ jobs:
           python -c "from organizer import FileOrganizer; from gui import FileOrganizerGUI"
 
       - name: Build executable with PyInstaller
-        run: |
-          pyinstaller `
-            --onedir `
-            --windowed `
-            --name "${{ env.APP_NAME }}" `
-            --hidden-import organizer `
-            --add-data "organizer.py;." `
-            main.py
+        run: pyinstaller FluentFold.spec
 
       - name: Verify executable
         run: |
