@@ -75,7 +75,6 @@ jobs:
             --onedir `
             --windowed `
             --name "${{ env.APP_NAME }}" `
-
             --hidden-import organizer `
             --add-data "organizer.py;." `
             main.py
