@@ -20,7 +20,6 @@ a = Analysis(
     binaries=[],
     datas=[
         ('organizer.py', '.'),
-        ('pyqt5_shim.py', '.'),
     ],
     hiddenimports=[
         'organizer',
@@ -31,11 +30,13 @@ a = Analysis(
         'PySide6.QtGui',
         'PySide6.QtWidgets',
         'PySide6.QtNetwork',
+        'PySide6.QtSvg',
+        'PySide6.QtXml',
         'shiboken6',
     ],
     hookspath=[],
     hooksconfig={},
-    runtime_hooks=['pyqt5_shim.py'],
+    runtime_hooks=[],
     excludes=[
         'PyQt5', 'PyQt5.QtCore', 'PyQt5.QtGui', 'PyQt5.QtWidgets',
         'PyQt5.sip', 'PyQt5.QtNetwork',

@@ -1,6 +1,7 @@
 import sys
 import importlib.abc
 import importlib.machinery
+import types
 
 
 class QRegExpStub:
@@ -11,56 +12,72 @@ class QRegExpValidatorStub:
     pass
 
 
+_EXTRA_QT_CORE = {
+    'pyqtSignal': None,
+    'QRegExp': QRegExpStub,
+}
+_EXTRA_QT_GUI = {
+    'QRegExpValidator': QRegExpValidatorStub,
+}
+
+
+def _create_stub_module(name):
+    mod = types.ModuleType(name)
+    mod.__package__ = name.rpartition('.')[0] if '.' in name else name
+    mod.__path__ = []
+    return mod
+
+
 class PyQt5ShimFinder(importlib.abc.MetaPathFinder):
-    _MAPPING = {
-        'PyQt5': None,
-        'PyQt5.QtCore': 'PySide6.QtCore',
-        'PyQt5.QtGui': 'PySide6.QtGui',
-        'PyQt5.QtWidgets': 'PySide6.QtWidgets',
-    }
 
     def find_spec(self, fullname, path, target=None):
-        if fullname not in self._MAPPING:
+        if fullname == 'PyQt5':
+            return importlib.machinery.ModuleSpec(
+                fullname, None, is_package=True)
+
+        prefix = 'PyQt5.'
+        if not fullname.startswith(prefix):
             return None
-        target_name = self._MAPPING[fullname]
-        if target_name is None:
-            return importlib.machinery.ModuleSpec(fullname, None, is_package=True)
-        loader = _ShimLoader(fullname, target_name)
+
+        sub = fullname[len(prefix):]
+        pyside_name = f'PySide6.{sub}'
+
+        try:
+            target_mod = importlib.import_module(pyside_name)
+        except (ImportError, ModuleNotFoundError):
+            target_mod = None
+
+        loader = _ShimLoader(fullname, target_mod)
         return importlib.machinery.ModuleSpec(fullname, loader, is_package=False)
 
 
 class _ShimLoader(importlib.abc.Loader):
-    _SHIM_ATTRS = {
-        'PyQt5.QtCore': {
-            'pyqtSignal': None,
-            'QRegExp': QRegExpStub,
-        },
-        'PyQt5.QtGui': {
-            'QRegExpValidator': QRegExpValidatorStub,
-        },
-        'PyQt5.QtWidgets': {},
-    }
 
-    def __init__(self, shim_name, target_name):
+    def __init__(self, shim_name, target_mod):
         self.shim_name = shim_name
-        self.target_name = target_name
+        self.target_mod = target_mod
 
     def create_module(self, spec):
         return None
 
     def exec_module(self, module):
-        target = importlib.import_module(self.target_name)
-        for attr in dir(target):
-            if not attr.startswith('_'):
-                try:
-                    setattr(module, attr, getattr(target, attr))
-                except Exception:
-                    pass
+        if self.target_mod is not None:
+            for attr in dir(self.target_mod):
+                if not attr.startswith('_'):
+                    try:
+                        setattr(module, attr, getattr(self.target_mod, attr))
+                    except Exception:
+                        pass
+
         if self.shim_name == 'PyQt5.QtCore':
             module.pyqtSignal = module.Signal
-        for name, val in self._SHIM_ATTRS.get(self.shim_name, {}).items():
-            if not hasattr(module, name):
-                setattr(module, name, val)
+            for name, val in _EXTRA_QT_CORE.items():
+                if not hasattr(module, name):
+                    setattr(module, name, val)
+        elif self.shim_name == 'PyQt5.QtGui':
+            for name, val in _EXTRA_QT_GUI.items():
+                if not hasattr(module, name):
+                    setattr(module, name, val)
 
 
 sys.meta_path.insert(0, PyQt5ShimFinder())

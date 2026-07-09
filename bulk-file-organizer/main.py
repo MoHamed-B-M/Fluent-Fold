@@ -11,6 +11,7 @@ Entry point for the application.
 
 import sys
 import os
+import pyqt5_shim  # must be first: redirect PyQt5 imports to PySide6
 
 # Add project root to path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
