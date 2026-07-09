@@ -6,9 +6,11 @@ Package: Bundles into a portable single-folder .exe distribution
 
 import os
 import sys
-from pathlib import Path
 
-project_root = Path(__file__).parent.resolve()
+try:
+    project_root = os.path.dirname(os.path.abspath(__file__))
+except NameError:
+    project_root = os.getcwd()
 
 block_cipher = None
 
