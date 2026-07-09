@@ -48,7 +48,7 @@ if ($Clean -and (Test-Path "$ScriptDir\dist")) {
 # Step 2: Verify dependencies
 Write-Host "📦 Checking dependencies..." -ForegroundColor Yellow
 
-$deps = @("PySide6", "qfluentwidgets", "pyinstaller")
+$deps = @("PySide6", "PyQt5", "qfluentwidgets", "pyinstaller")
 foreach ($dep in $deps) {
     try {
         python -c "import $dep" 2>$null
@@ -75,13 +75,7 @@ $pyinstallerArgs = @(
     "--onedir",
     "--windowed",
     "--name", $AppName,
-    "--exclude", "PyQt5",
-    "--exclude", "PyQt5.QtCore",
-    "--exclude", "PyQt5.QtGui",
-    "--exclude", "PyQt5.QtWidgets",
-    "--exclude", "PyQt5.sip",
-    "--exclude", "PyQt5.QtNetwork",
-    "--exclude", "PyQt5-Frameless-Window",
+
     "--hidden-import", "organizer",
     "--add-data", "organizer.py;.",
     "--noconfirm"

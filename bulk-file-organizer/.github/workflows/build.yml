@@ -62,6 +62,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install git+https://github.com/zhiyiYo/PyQt-Fluent-Widgets.git
+          pip install PyQt5
           pip install pyinstaller
 
       - name: Verify imports
@@ -74,13 +75,7 @@ jobs:
             --onedir `
             --windowed `
             --name "${{ env.APP_NAME }}" `
-            --exclude PyQt5 `
-            --exclude PyQt5.QtCore `
-            --exclude PyQt5.QtGui `
-            --exclude PyQt5.QtWidgets `
-            --exclude PyQt5.sip `
-            --exclude PyQt5.QtNetwork `
-            --exclude PyQt5-Frameless-Window `
+
             --hidden-import organizer `
             --add-data "organizer.py;." `
             main.py

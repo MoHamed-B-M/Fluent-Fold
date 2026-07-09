@@ -1,8 +1,9 @@
 # Bulk File Organizer - Requirements
 # Built with PySide6 and qfluentwidgets (PyQt-Fluent-Widgets)
 
-# Core GUI Framework
+# Qt Bindings (both needed for qfluentwidgets compatibility)
 PySide6>=6.9.0
+PyQt5>=5.15.0
 
 # Fluent Design Widgets (Microsoft Fluent Design System for Qt)
 # Installed via: pip install git+https://github.com/zhiyiYo/PyQt-Fluent-Widgets.git
