@@ -46,6 +46,15 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
+        <InfoBar
+            x:Name="NotificationBar"
+            Title="{x:Bind ViewModel.NotificationTitle, Mode=OneWay}"
+            Message="{x:Bind ViewModel.NotificationMessage, Mode=OneWay}"
+            Severity="{x:Bind ViewModel.NotificationSeverity, Mode=OneWay}"
+            IsOpen="{x:Bind ViewModel.IsNotificationOpen, Mode=TwoWay}"
+            IsClosable="True"
+            Margin="0,0,0,12" />
+
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
             <StackPanel Spacing="20">
                 <!-- Header Section -->

@@ -68,6 +68,7 @@ public class FileOrganizerService
         var undoAction = new UndoAction { Type = "organize" };
 
         var items = await folder.GetItemsAsync();
+        var createdFolders = new HashSet<string>();
 
         foreach (var item in items)
         {
@@ -78,8 +79,10 @@ public class FileOrganizerService
             var categoryName = category.ToString();
 
             var categoryFolder = await folder.CreateFolderAsync(categoryName, CreationCollisionOption.OpenIfExists);
+            createdFolders.Add(categoryName);
 
-            var movedFile = await file.MoveAsync(categoryFolder, file.Name, NameCollisionOption.GenerateUniqueName);
+            var destName = await ResolveCollisionAsync(categoryFolder, file.Name);
+            var movedFile = await file.MoveAsync(categoryFolder, destName, NameCollisionOption.ReplaceExisting);
 
             undoAction.Moves.Add(new FileMove
             {
@@ -91,10 +94,28 @@ public class FileOrganizerService
             result.MovedItems.Add($"{file.Name} \u2192 {categoryName}\\{movedFile.Name}");
         }
 
+        undoAction.CreatedFolders = createdFolders.ToList();
+
         if (result.FilesMoved > 0)
             _undoStack.Push(undoAction);
 
         return result;
+    }
+
+    private static async Task<string> ResolveCollisionAsync(StorageFolder folder, string desiredName)
+    {
+        var name = Path.GetFileNameWithoutExtension(desiredName);
+        var ext = Path.GetExtension(desiredName);
+        var candidate = desiredName;
+        int counter = 1;
+
+        while (await folder.TryGetItemAsync(candidate) != null)
+        {
+            candidate = $"{name}_{counter}{ext}";
+            counter++;
+        }
+
+        return candidate;
     }
 
     public async Task<RenameResult> RenameFilesAsync(StorageFolder folder, string pattern, int startNumber)
@@ -114,27 +135,33 @@ public class FileOrganizerService
             return result;
 
         var undoAction = new UndoAction { Type = "rename" };
-        var totalDigits = files.Count.ToString().Length;
-        if (totalDigits < 3) totalDigits = 3;
+        int maxIndex = files.Count + startNumber - 1;
+        int padding = maxIndex.ToString().Length;
 
         int index = startNumber;
         foreach (var file in files)
         {
             var originalName = file.Name;
             var ext = file.FileType;
-            var paddedIndex = index.ToString().PadLeft(totalDigits, '0');
+            var paddedIndex = index.ToString().PadLeft(padding, '0');
             var newName = $"{pattern}_{paddedIndex}{ext}";
+            var targetPath = System.IO.Path.Combine(folder.Path, newName);
 
-            await file.RenameAsync(newName, NameCollisionOption.GenerateUniqueName);
+            if (File.Exists(targetPath))
+            {
+                newName = $"{pattern}_{paddedIndex}_copy{ext}";
+            }
+
+            await file.RenameAsync(newName, NameCollisionOption.ReplaceExisting);
 
             undoAction.Moves.Add(new FileMove
             {
-                CurrentPath = file.Path,
-                OriginalPath = Path.Combine(folder.Path, originalName)
+                CurrentPath = System.IO.Path.Combine(folder.Path, newName),
+                OriginalPath = System.IO.Path.Combine(folder.Path, originalName)
             });
 
             result.FilesRenamed++;
-            result.RenamedItems.Add((originalName, file.Name));
+            result.RenamedItems.Add((originalName, newName));
             index++;
         }
 
@@ -152,7 +179,6 @@ public class FileOrganizerService
         var action = _undoStack.Pop();
         int undone = 0;
 
-        // Process in reverse order for rename operations
         var moves = action.Type == "rename"
             ? Enumerable.Reverse(action.Moves).ToList()
             : action.Moves;
@@ -166,12 +192,33 @@ public class FileOrganizerService
                     Path.GetDirectoryName(move.OriginalPath)!);
                 var destName = Path.GetFileName(move.OriginalPath);
 
-                await sourceFile.MoveAsync(destFolder, destName, NameCollisionOption.GenerateUniqueName);
+                await sourceFile.MoveAsync(destFolder, destName, NameCollisionOption.ReplaceExisting);
                 undone++;
             }
             catch
             {
                 // skip files that can't be restored
+            }
+        }
+
+        if (action.Type == "organize" && undone > 0)
+        {
+            foreach (var catName in action.CreatedFolders)
+            {
+                try
+                {
+                    var catFolder = await StorageFolder.GetFolderFromPathAsync(
+                        System.IO.Path.Combine(
+                            Path.GetDirectoryName(action.Moves[0].OriginalPath)!,
+                            catName));
+                    var remaining = await catFolder.GetItemsAsync();
+                    if (remaining.Count == 0)
+                        await catFolder.DeleteAsync();
+                }
+                catch
+                {
+                    // skip folders that can't be cleaned up
+                }
             }
         }
 
@@ -190,6 +237,7 @@ public class FileOrganizerService
     {
         public string Type { get; set; } = "";
         public List<FileMove> Moves { get; set; } = new();
+        public List<string> CreatedFolders { get; set; } = new();
     }
 
     private class FileMove

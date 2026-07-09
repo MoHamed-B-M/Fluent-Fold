@@ -69,7 +69,9 @@ public sealed partial class OrganizerPage : Page
         {
             var p = patternBox.Text;
             if (string.IsNullOrWhiteSpace(p)) p = "file";
-            preview.Text = $"Preview: {p}_001.ext, {p}_002.ext, ...";
+            var digits = numberBox.Value.ToString().Length + 2;
+            if (digits < 3) digits = 3;
+            preview.Text = $"Preview: {p}_{"1".PadLeft(digits, '0')}.ext, {p}_{"2".PadLeft(digits, '0')}.ext, ...";
         }
 
         patternBox.TextChanged += (_, _) => UpdatePreview();

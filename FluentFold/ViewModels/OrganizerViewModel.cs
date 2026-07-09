@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using FluentFold.Models;
 using FluentFold.Services;
+using Microsoft.UI.Xaml.Controls;
 using Windows.Storage;
 using Windows.Storage.Pickers;
 
@@ -34,6 +35,18 @@ public partial class OrganizerViewModel : ObservableObject
 
     [ObservableProperty]
     private bool _canUndo;
+
+    [ObservableProperty]
+    private bool _isNotificationOpen;
+
+    [ObservableProperty]
+    private string _notificationTitle = "";
+
+    [ObservableProperty]
+    private string _notificationMessage = "";
+
+    [ObservableProperty]
+    private InfoBarSeverity _notificationSeverity = InfoBarSeverity.Success;
 
     public ObservableCollection<CategoryCountItem> CategoryCounts { get; } = new();
 
@@ -127,12 +140,14 @@ public partial class OrganizerViewModel : ObservableObject
 
             StatusMessage = $"Organized {result.FilesMoved} files";
             CanUndo = _organizerService.CanUndo;
+            ShowNotification("Organize Complete", $"Organized {result.FilesMoved} files into category folders", InfoBarSeverity.Success);
             await RefreshSummaryAsync();
         }
         catch (Exception ex)
         {
             StatusMessage = "Organize failed";
             AddLog($"Error: {ex.Message}");
+            ShowNotification("Error", ex.Message, InfoBarSeverity.Error);
         }
         finally
         {
@@ -162,12 +177,14 @@ public partial class OrganizerViewModel : ObservableObject
 
             StatusMessage = $"Renamed {result.FilesRenamed} files";
             CanUndo = _organizerService.CanUndo;
+            ShowNotification("Rename Complete", $"Renamed {result.FilesRenamed} files with pattern 'file_###'", InfoBarSeverity.Success);
             await RefreshSummaryAsync();
         }
         catch (Exception ex)
         {
             StatusMessage = "Rename failed";
             AddLog($"Error: {ex.Message}");
+            ShowNotification("Error", ex.Message, InfoBarSeverity.Error);
         }
         finally
         {
@@ -194,12 +211,14 @@ public partial class OrganizerViewModel : ObservableObject
 
             StatusMessage = $"Renamed {result.FilesRenamed} files";
             CanUndo = _organizerService.CanUndo;
+            ShowNotification("Rename Complete", $"Renamed {result.FilesRenamed} files with pattern '{pattern}_###'", InfoBarSeverity.Success);
             await RefreshSummaryAsync();
         }
         catch (Exception ex)
         {
             StatusMessage = "Rename failed";
             AddLog($"Error: {ex.Message}");
+            ShowNotification("Error", ex.Message, InfoBarSeverity.Error);
         }
         finally
         {
@@ -221,17 +240,28 @@ public partial class OrganizerViewModel : ObservableObject
             AddLog($"Undo: {result.Message}");
             StatusMessage = result.Message;
             CanUndo = _organizerService.CanUndo;
+            var sev = result.Success ? InfoBarSeverity.Success : InfoBarSeverity.Warning;
+            ShowNotification("Undo", result.Message, sev);
             await RefreshSummaryAsync();
         }
         catch (Exception ex)
         {
             StatusMessage = "Undo failed";
             AddLog($"Error: {ex.Message}");
+            ShowNotification("Error", ex.Message, InfoBarSeverity.Error);
         }
         finally
         {
             IsBusy = false;
         }
+    }
+
+    private void ShowNotification(string title, string message, InfoBarSeverity severity)
+    {
+        NotificationTitle = title;
+        NotificationMessage = message;
+        NotificationSeverity = severity;
+        IsNotificationOpen = true;
     }
 
     private void AddLog(string message)
