@@ -1,3 +1,4 @@
+using Microsoft.UI.Composition.SystemBackdrops;
 using Microsoft.UI.Xaml;
 using FluentFold.Views;
 
@@ -14,11 +15,10 @@ public partial class MainWindow : Window
         Content = rootFrame;
         rootFrame.Navigate(typeof(MainPage));
 
-        // Enable Mica
-        if (Microsoft.UI.Composition.SystemBackdrops.MicaController.IsSupported())
+        if (MicaController.IsSupported())
         {
-            var micaController = new Microsoft.UI.Composition.SystemBackdrops.MicaController();
-            var configurationSource = new Microsoft.UI.Composition.SystemBackdrops.SystemBackdropConfiguration
+            var micaController = new MicaController();
+            var configurationSource = new SystemBackdropConfiguration
             {
                 IsInputActive = true,
                 Theme = SystemBackdropTheme.Default
