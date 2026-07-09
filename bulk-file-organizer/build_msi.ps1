@@ -75,8 +75,10 @@ Get-ChildItem -Path $appDir -Recurse -File | ForEach-Object {
 "@
         $refLines += '                <ComponentRef Id="MainExecutable" />'
     } else {
-        $fileId = [System.IO.Path]::GetFileNameWithoutExtension($relPath) -replace '[^a-zA-Z0-9]', '_'
-        if ([string]::IsNullOrEmpty($fileId)) { $fileId = "file_$([System.IO.Path]::GetFileNameWithoutExtension($relPath).GetHashCode().ToString().Replace('-','_'))" }
+        $baseName = [System.IO.Path]::GetFileNameWithoutExtension($relPath)
+        $dirPath = [System.IO.Path]::GetDirectoryName($relPath)
+        $fileId = "$dirPath\$baseName" -replace '[^a-zA-Z0-9]', '_'
+        if ([string]::IsNullOrEmpty($fileId)) { $fileId = "file_$($relPath.GetHashCode().ToString().Replace('-','_'))" }
         $fileName = [System.IO.Path]::GetFileName($relPath)
         $fileSource = "$appDir\$relPath"
         $componentLines += @"
