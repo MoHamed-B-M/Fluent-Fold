@@ -1,4 +1,4 @@
-name: Build
+name: Build & Package
 
 on:
   push:
@@ -15,7 +15,17 @@ env:
 
 jobs:
   build:
-    name: Build
+    name: MSIX (${{ matrix.arch.name }})
+    strategy:
+      matrix:
+        arch:
+          - name: x64
+            platform: x64
+          - name: x86
+            platform: x86
+          - name: arm64
+            platform: ARM64
+      fail-fast: false
     runs-on: windows-latest
 
     steps:
@@ -27,34 +37,78 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: Restore
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Restore main project
         run: dotnet restore FluentFold/FluentFold.csproj
 
-      - name: Build
-        run: dotnet build FluentFold/FluentFold.csproj -c ${{ env.CONFIGURATION }} --no-restore
-
-      - name: Locate and upload build artifacts
+      - name: Create signing certificate
         run: |
-          $paths = @(
-            "FluentFold/bin/x64/Release/net8.0-windows10.0.19041.0",
-            "FluentFold/bin/Release/net8.0-windows10.0.19041.0",
-            "FluentFold/bin/x64/Release/net8.0-windows10.0.19041.0/win10-x64"
+          $cert = New-SelfSignedCertificate -Type Custom `
+            -Subject "CN=FluentFold" `
+            -KeyUsage DigitalSignature `
+            -TextExtension @("2.5.29.37={text}1.3.6.1.5.5.7.3.3") `
+            -CertStoreLocation "Cert:\CurrentUser\My"
+          $pwd = ConvertTo-SecureString -String "p@ssw0rd" -Force -AsPlainText
+          Export-PfxCertificate -Cert $cert `
+            -FilePath "FluentFoldPackage\FluentFoldPackage_TemporaryKey.pfx" `
+            -Password $pwd
+
+      - name: Resolve WapProjPath
+        id: wap
+        run: |
+          $candidates = @(
+            "$env:ProgramFiles\Microsoft Visual Studio\2022\Enterprise\MSBuild\Microsoft\VisualStudio\v17.0\DesktopBridge",
+            "$env:ProgramFiles\Microsoft Visual Studio\2022\Professional\MSBuild\Microsoft\VisualStudio\v17.0\DesktopBridge",
+            "$env:ProgramFiles\Microsoft Visual Studio\2022\Community\MSBuild\Microsoft\VisualStudio\v17.0\DesktopBridge",
+            "$env:ProgramFiles (x86)\Microsoft Visual Studio\2022\Enterprise\MSBuild\Microsoft\VisualStudio\v17.0\DesktopBridge",
+            "$env:ProgramFiles (x86)\Microsoft Visual Studio\2022\Professional\MSBuild\Microsoft\VisualStudio\v17.0\DesktopBridge",
+            "$env:ProgramFiles (x86)\Microsoft Visual Studio\2022\Community\MSBuild\Microsoft\VisualStudio\v17.0\DesktopBridge"
           )
           $found = $false
-          foreach ($p in $paths) {
-            if (Test-Path $p) {
-              Write-Host "Found: $p"
-              Get-ChildItem $p -Recurse -File | Select-Object -First 20 | ForEach-Object { Write-Host "  $($_.Name)" }
+          foreach ($p in $candidates) {
+            if (Test-Path "$p\Microsoft.DesktopBridge.targets") {
+              "wap_proj_path=$p" >> $env:GITHUB_OUTPUT
+              Write-Host "Resolved WapProjPath: $p"
               $found = $true
+              break
             }
           }
           if (-not $found) {
-            Get-ChildItem FluentFold/bin -Recurse -Directory | ForEach-Object { Write-Host "Dir: $($_.FullName)" }
+            throw "Could not locate Microsoft.DesktopBridge.targets"
           }
 
-      - name: Upload build folder
+      - name: Build MSIX package
+        run: |
+          $pfxPath = (Resolve-Path "FluentFoldPackage\FluentFoldPackage_TemporaryKey.pfx").Path
+          msbuild FluentFoldPackage\FluentFoldPackage.wapproj `
+            /p:Configuration=${{ env.CONFIGURATION }} `
+            /p:Platform=${{ matrix.arch.platform }} `
+            /p:AppxPackage=true `
+            /p:AppxBundle=Never `
+            /p:UapAppxPackageBuildMode=SideloadOnly `
+            /p:AppxPackageSigningEnabled=true `
+            /p:PackageCertificateKeyFile="$pfxPath" `
+            /p:PackageCertificatePassword=p@ssw0rd `
+            /p:PackageCertificateThumbprint="" `
+            /p:WapProjPath="${{ steps.wap.outputs.wap_proj_path }}" `
+            /t:Restore;Build;Publish
+
+      - name: Locate MSIX
+        run: |
+          $msix = Get-ChildItem -Recurse -Filter "*.msix" | Select-Object -First 1
+          if (-not $msix) {
+            Get-ChildItem -Recurse -Directory -Filter "AppxPackage" | ForEach-Object { Write-Host "AppxPackage dir: $($_.FullName)" }
+            throw "No MSIX file found"
+          }
+          New-Item -ItemType Directory -Path publish -Force
+          Copy-Item $msix.FullName "publish\${{ env.APP_NAME }}-${{ matrix.arch.name }}.msix"
+          Write-Host "MSIX: $($msix.FullName) ($([math]::Round($msix.Length/1MB,2)) MB)"
+
+      - name: Upload MSIX artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.APP_NAME }}-build
-          path: FluentFold/bin/
+          name: ${{ env.APP_NAME }}-${{ matrix.arch.name }}-msix
+          path: publish\${{ env.APP_NAME }}-${{ matrix.arch.name }}.msix
           if-no-files-found: error
