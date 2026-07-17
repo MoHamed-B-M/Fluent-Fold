@@ -21,10 +21,13 @@ jobs:
         arch:
           - name: x64
             platform: x64
+            rid: win-x64
           - name: x86
             platform: x86
+            rid: win-x86
           - name: arm64
             platform: ARM64
+            rid: win-arm64
       fail-fast: false
     runs-on: windows-latest
 
@@ -37,11 +40,11 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: Add msbuild to PATH
-        uses: microsoft/setup-msbuild@v2
+      - name: Restore
+        run: dotnet restore FluentFold/FluentFold.csproj -r ${{ matrix.arch.rid }}
 
-      - name: Restore main project
-        run: dotnet restore FluentFold/FluentFold.csproj
+      - name: Build
+        run: dotnet build FluentFold/FluentFold.csproj -c ${{ env.CONFIGURATION }} -r ${{ matrix.arch.rid }} --no-restore -p:Platform=${{ matrix.arch.platform }}
 
       - name: Create signing certificate
         run: |
@@ -51,60 +54,86 @@ jobs:
             -TextExtension @("2.5.29.37={text}1.3.6.1.5.5.7.3.3") `
             -CertStoreLocation "Cert:\CurrentUser\My"
           $pwd = ConvertTo-SecureString -String "p@ssw0rd" -Force -AsPlainText
-          Export-PfxCertificate -Cert $cert `
-            -FilePath "FluentFoldPackage\FluentFoldPackage_TemporaryKey.pfx" `
-            -Password $pwd
+          Export-PfxCertificate -Cert $cert -FilePath "signing.pfx" -Password $pwd
 
-      - name: Resolve WapProjPath
-        id: wap
+      - name: Locate build output
+        id: paths
         run: |
-          $candidates = @(
-            "$env:ProgramFiles\Microsoft Visual Studio\2022\Enterprise\MSBuild\Microsoft\VisualStudio\v17.0\DesktopBridge",
-            "$env:ProgramFiles\Microsoft Visual Studio\2022\Professional\MSBuild\Microsoft\VisualStudio\v17.0\DesktopBridge",
-            "$env:ProgramFiles\Microsoft Visual Studio\2022\Community\MSBuild\Microsoft\VisualStudio\v17.0\DesktopBridge",
-            "$env:ProgramFiles (x86)\Microsoft Visual Studio\2022\Enterprise\MSBuild\Microsoft\VisualStudio\v17.0\DesktopBridge",
-            "$env:ProgramFiles (x86)\Microsoft Visual Studio\2022\Professional\MSBuild\Microsoft\VisualStudio\v17.0\DesktopBridge",
-            "$env:ProgramFiles (x86)\Microsoft Visual Studio\2022\Community\MSBuild\Microsoft\VisualStudio\v17.0\DesktopBridge"
+          $exe = Get-ChildItem -Recurse "FluentFold\bin" -Filter "${{ env.APP_NAME }}.exe" |
+            Select-Object -First 1
+          if (-not $exe) {
+            Get-ChildItem FluentFold\bin -Recurse -Directory | ForEach-Object { Write-Host "  $($_.FullName)" }
+            throw "${{ env.APP_NAME }}.exe not found under FluentFold\bin"
+          }
+          $buildDir = $exe.Directory.FullName
+          "build_dir=$buildDir" >> $env:GITHUB_OUTPUT
+          Write-Host "Build dir: $buildDir"
+
+      - name: Find Windows SDK tools
+        id: sdk
+        run: |
+          $kits = @(
+            "C:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0",
+            "C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0",
+            "C:\Program Files (x86)\Windows Kits\10\bin\10.0.22000.0",
+            "C:\Program Files (x86)\Windows Kits\10\bin\10.0.20348.0",
+            "C:\Program Files (x86)\Windows Kits\10\bin\10.0.19041.0"
           )
           $found = $false
-          foreach ($p in $candidates) {
-            if (Test-Path "$p\Microsoft.DesktopBridge.targets") {
-              "wap_proj_path=$p" >> $env:GITHUB_OUTPUT
-              Write-Host "Resolved WapProjPath: $p"
+          foreach ($kit in $kits) {
+            $makeappx = "$kit\x64\makeappx.exe"
+            $signtool = "$kit\x64\signtool.exe"
+            if ((Test-Path $makeappx) -and (Test-Path $signtool)) {
+              "kit_dir=$kit" >> $env:GITHUB_OUTPUT
+              Write-Host "SDK: $kit"
               $found = $true
               break
             }
           }
           if (-not $found) {
-            throw "Could not locate Microsoft.DesktopBridge.targets"
+            $makeappx = Get-Command "makeappx.exe" -ErrorAction SilentlyContinue
+            $signtool = Get-Command "signtool.exe" -ErrorAction SilentlyContinue
+            if ($makeappx -and $signtool) {
+              "kit_dir=$($makeappx.Source)" >> $env:GITHUB_OUTPUT
+              Write-Host "Found in PATH"
+              $found = $true
+            }
+          }
+          if (-not $found) { throw "Windows SDK tools not found" }
+
+      - name: Create MSIX package
+        run: |
+          $buildDir = "${{ steps.paths.outputs.build_dir }}"
+          $layout = "msix-layout"
+          New-Item -ItemType Directory -Path "$layout\Assets" -Force
+
+          Copy-Item "$buildDir\*" $layout -Recurse -Force -Exclude "*.xml","*.pdb"
+
+          $manifest = Get-Content "FluentFoldPackage\Package.appxmanifest" -Raw
+          $manifest = $manifest -replace '\$targetnametoken\$', '${{ env.APP_NAME }}'
+          $manifest = $manifest -replace '\$targetentrypoint\$', '${{ env.APP_NAME }}.App'
+          Set-Content -Path "$layout\AppxManifest.xml" -Value $manifest
+
+          Copy-Item "FluentFold\Assets\*" "$layout\Assets\" -Force
+
+          if (-not (Test-Path "$layout\${{ env.APP_NAME }}.exe")) {
+            $exe = Get-ChildItem $layout -Filter "*.exe" | Select-Object -First 1
+            if (-not $exe) { throw "No .exe found in build output" }
+            Write-Host "EXE: $($exe.Name)"
           }
 
-      - name: Build MSIX package
-        run: |
-          $pfxPath = (Resolve-Path "FluentFoldPackage\FluentFoldPackage_TemporaryKey.pfx").Path
-          msbuild FluentFoldPackage\FluentFoldPackage.wapproj `
-            /p:Configuration=${{ env.CONFIGURATION }} `
-            /p:Platform=${{ matrix.arch.platform }} `
-            /p:AppxPackage=true `
-            /p:AppxBundle=Never `
-            /p:UapAppxPackageBuildMode=SideloadOnly `
-            /p:AppxPackageSigningEnabled=true `
-            /p:PackageCertificateKeyFile="$pfxPath" `
-            /p:PackageCertificatePassword=p@ssw0rd `
-            /p:PackageCertificateThumbprint="" `
-            /p:WapProjPath="${{ steps.wap.outputs.wap_proj_path }}" `
-            /t:Restore;Build;Publish
+          $msixFile = "${{ env.APP_NAME }}-${{ matrix.arch.name }}.msix"
+          $makeappx = "${{ steps.sdk.outputs.kit_dir }}\x64\makeappx.exe"
+          & $makeappx pack /d $layout /p $msixFile /l
+          if (-not (Test-Path $msixFile)) { throw "makeappx failed" }
 
-      - name: Locate MSIX
-        run: |
-          $msix = Get-ChildItem -Recurse -Filter "*.msix" | Select-Object -First 1
-          if (-not $msix) {
-            Get-ChildItem -Recurse -Directory -Filter "AppxPackage" | ForEach-Object { Write-Host "AppxPackage dir: $($_.FullName)" }
-            throw "No MSIX file found"
-          }
+          $signtool = "${{ steps.sdk.outputs.kit_dir }}\x64\signtool.exe"
+          & $signtool sign /fd SHA256 /a /f signing.pfx /p p@ssw0rd $msixFile
+          if ($LASTEXITCODE -ne 0) { throw "signtool failed" }
+
           New-Item -ItemType Directory -Path publish -Force
-          Copy-Item $msix.FullName "publish\${{ env.APP_NAME }}-${{ matrix.arch.name }}.msix"
-          Write-Host "MSIX: $($msix.FullName) ($([math]::Round($msix.Length/1MB,2)) MB)"
+          Move-Item $msixFile "publish\$msixFile" -Force
+          Write-Host "MSIX created: publish\$msixFile ($([math]::Round((Get-Item "publish\$msixFile").Length/1MB,2)) MB)"
 
       - name: Upload MSIX artifact
         uses: actions/upload-artifact@v4
