@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "FluentFold (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "FluentFold (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
