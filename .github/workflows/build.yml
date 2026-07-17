@@ -47,6 +47,7 @@ jobs:
         run: dotnet build FluentFold/FluentFold.csproj -c ${{ env.CONFIGURATION }} -r ${{ matrix.arch.rid }} --no-restore -p:Platform=${{ matrix.arch.platform }}
 
       - name: Create signing certificate
+        id: cert
         run: |
           $cert = New-SelfSignedCertificate -Type Custom `
             -Subject "CN=FluentFold" `
@@ -55,6 +56,8 @@ jobs:
             -CertStoreLocation "Cert:\CurrentUser\My"
           $pwd = ConvertTo-SecureString -String "p@ssw0rd" -Force -AsPlainText
           Export-PfxCertificate -Cert $cert -FilePath "signing.pfx" -Password $pwd
+          Write-Host "Cert thumbprint: $($cert.Thumbprint)"
+          "thumbprint=$($cert.Thumbprint)" >> $env:GITHUB_OUTPUT
 
       - name: Locate build output
         id: paths
@@ -72,6 +75,7 @@ jobs:
       - name: Find Windows SDK tools
         id: sdk
         run: |
+          $arch = "${{ matrix.arch.name }}"
           $kits = @(
             "C:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0",
             "C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0",
@@ -81,23 +85,19 @@ jobs:
           )
           $found = $false
           foreach ($kit in $kits) {
-            $makeappx = "$kit\x64\makeappx.exe"
-            $signtool = "$kit\x64\signtool.exe"
-            if ((Test-Path $makeappx) -and (Test-Path $signtool)) {
-              "kit_dir=$kit" >> $env:GITHUB_OUTPUT
-              Write-Host "SDK: $kit"
-              $found = $true
-              break
+            foreach ($sub in @($arch, "x64", "x86", "")) {
+              $ma = if ($sub) { "$kit\$sub\makeappx.exe" } else { "$kit\makeappx.exe" }
+              $st = if ($sub) { "$kit\$sub\signtool.exe" } else { "$kit\signtool.exe" }
+              if ((Test-Path $ma) -and (Test-Path $st)) {
+                "makeappx=$ma" >> $env:GITHUB_OUTPUT
+                "signtool=$st" >> $env:GITHUB_OUTPUT
+                Write-Host "makeappx: $ma"
+                Write-Host "signtool: $st"
+                $found = $true
+                break
+              }
             }
-          }
-          if (-not $found) {
-            $makeappx = Get-Command "makeappx.exe" -ErrorAction SilentlyContinue
-            $signtool = Get-Command "signtool.exe" -ErrorAction SilentlyContinue
-            if ($makeappx -and $signtool) {
-              "kit_dir=$($makeappx.Source)" >> $env:GITHUB_OUTPUT
-              Write-Host "Found in PATH"
-              $found = $true
-            }
+            if ($found) { break }
           }
           if (-not $found) { throw "Windows SDK tools not found" }
 
@@ -108,6 +108,7 @@ jobs:
           New-Item -ItemType Directory -Path "$layout\Assets" -Force
 
           Copy-Item "$buildDir\*" $layout -Recurse -Force -Exclude "*.xml","*.pdb"
+          Write-Host "Copied $((Get-ChildItem $layout -File).Count) files to layout"
 
           $manifest = Get-Content "FluentFoldPackage\Package.appxmanifest" -Raw
           $manifest = $manifest -replace '\$targetnametoken\$', '${{ env.APP_NAME }}'
@@ -116,24 +117,31 @@ jobs:
 
           Copy-Item "FluentFold\Assets\*" "$layout\Assets\" -Force
 
-          if (-not (Test-Path "$layout\${{ env.APP_NAME }}.exe")) {
-            $exe = Get-ChildItem $layout -Filter "*.exe" | Select-Object -First 1
-            if (-not $exe) { throw "No .exe found in build output" }
-            Write-Host "EXE: $($exe.Name)"
-          }
+          $exeCount = (Get-ChildItem $layout -Filter "*.exe").Count
+          Write-Host "EXEs in layout: $exeCount"
+          if ($exeCount -eq 0) { throw "No .exe found in build output" }
 
           $msixFile = "${{ env.APP_NAME }}-${{ matrix.arch.name }}.msix"
-          $makeappx = "${{ steps.sdk.outputs.kit_dir }}\x64\makeappx.exe"
-          & $makeappx pack /d $layout /p $msixFile /l
+          & "${{ steps.sdk.outputs.makeappx }}" pack /d $layout /p $msixFile /l
           if (-not (Test-Path $msixFile)) { throw "makeappx failed" }
+          Write-Host "MSIX packed: $((Get-Item $msixFile).Length) bytes"
 
-          $signtool = "${{ steps.sdk.outputs.kit_dir }}\x64\signtool.exe"
-          & $signtool sign /fd SHA256 /a /f signing.pfx /p p@ssw0rd $msixFile
-          if ($LASTEXITCODE -ne 0) { throw "signtool failed" }
+          $thumbprint = "${{ steps.cert.outputs.thumbprint }}"
+          & "${{ steps.sdk.outputs.signtool }}" sign /fd SHA256 /debug /v `
+            /s My /n "CN=FluentFold" `
+            $msixFile 2>&1 | ForEach-Object { Write-Host "$_" }
+          if ($LASTEXITCODE -ne 0) {
+            Write-Host "First signing attempt failed, trying PFX..."
+            & "${{ steps.sdk.outputs.signtool }}" sign /fd SHA256 /debug /v `
+              /f signing.pfx /p p@ssw0rd `
+              $msixFile 2>&1 | ForEach-Object { Write-Host "$_" }
+            if ($LASTEXITCODE -ne 0) { throw "signtool failed after retry" }
+          }
 
           New-Item -ItemType Directory -Path publish -Force
           Move-Item $msixFile "publish\$msixFile" -Force
-          Write-Host "MSIX created: publish\$msixFile ($([math]::Round((Get-Item "publish\$msixFile").Length/1MB,2)) MB)"
+          $size = [math]::Round((Get-Item "publish\$msixFile").Length / 1MB, 2)
+          Write-Host "MSIX created: publish\$msixFile ($size MB)"
 
       - name: Upload MSIX artifact
         uses: actions/upload-artifact@v4
