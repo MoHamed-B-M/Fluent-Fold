@@ -1,4 +1,4 @@
-name: Build MSIX Packages
+name: Build MSIX + Portable Packages
 
 # Triggered on push/PR to main; signs with CERT_BASE64/CERT_PASSWORD secrets if configured
 
@@ -67,4 +67,43 @@ jobs:
             bin/${{ matrix.platform }}/Release/**/*.msixupload
             **/AppPackages/**/*.msix
             **/AppPackages/**/*.msixupload
+          if-no-files-found: warn
+
+  portable:
+    strategy:
+      matrix:
+        platform: [x64, x86, arm64]
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 10.0 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+          include-prerelease: true
+
+      - name: Publish self-contained for ${{ matrix.platform }}
+        run: |
+          dotnet publish -c Release `
+            -p:Platform=${{ matrix.platform }} `
+            -p:RuntimeIdentifierOverride=win-${{ matrix.platform }} `
+            -p:SelfContained=true `
+            -p:PublishSingleFile=false `
+            -p:PublishReadyToRun=false `
+            -p:PublishTrimmed=false
+
+      - name: Zip publish output
+        shell: pwsh
+        run: |
+          $publishDir = "bin\${{ matrix.platform }}\Release\net10.0-windows10.0.26100.0\win-${{ matrix.platform }}\publish"
+          Compress-Archive -Path "$publishDir\*" -DestinationPath "FluentFold-${{ matrix.platform }}-portable.zip"
+
+      - name: Upload Portable ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: FluentFold-${{ matrix.platform }}-portable
+          path: FluentFold-${{ matrix.platform }}-portable.zip
           if-no-files-found: warn
