@@ -69,7 +69,7 @@ jobs:
             **/AppPackages/**/*.msixupload
           if-no-files-found: warn
 
-  portable:
+  installer:
     strategy:
       matrix:
         platform: [x64]
@@ -85,11 +85,14 @@ jobs:
           dotnet-version: '10.0.x'
           include-prerelease: true
 
+      - name: Install Inno Setup
+        shell: pwsh
+        run: choco install innosetup --no-progress -y
+
       - name: Restore
         run: dotnet restore -p:Platform=${{ matrix.platform }} -p:RuntimeIdentifier=win-${{ matrix.platform }}
 
-      - name: Publish portable for ${{ matrix.platform }}
-        shell: pwsh
+      - name: Publish self-contained for ${{ matrix.platform }}
         run: |
           dotnet publish -c Release `
             -p:Platform=${{ matrix.platform }} `
@@ -99,27 +102,22 @@ jobs:
             -p:PublishTrimmed=false `
             -p:PublishReadyToRun=false `
             --no-restore
-          Write-Host "=== Publish output locations ==="
-          Get-ChildItem -Recurse -Filter "FluentFold.exe" -Path "bin" | Select-Object FullName
 
-      - name: Zip publish output
+      - name: Build installer with Inno Setup
         shell: pwsh
         run: |
-          $publishDir = Get-ChildItem -Path "bin\${{ matrix.platform }}\Release\net10.0-windows10.0.26100.0\win-${{ matrix.platform }}\publish" -ErrorAction SilentlyContinue
-          if (-not $publishDir) {
-            $publishDir = Get-ChildItem -Recurse -Filter "FluentFold.exe" -Path "bin" | Select-Object -First 1 -ExpandProperty Directory
+          $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\iscc.exe"
+          if (-not (Test-Path $iscc)) {
+            $iscc = Get-ChildItem -Path "${env:ProgramFiles(x86)}\Inno Setup*" -Filter "iscc.exe" -Recurse | Select-Object -First 1 -ExpandProperty FullName
           }
-          if (-not $publishDir) {
-            Write-Warning "Publish output not found"
-            Get-ChildItem -Path "bin" -Depth 3 -Directory | Select-Object FullName
-            exit 1
-          }
-          Write-Host "Zipping: $publishDir"
-          Compress-Archive -Path "$publishDir\*" -DestinationPath "FluentFold-${{ matrix.platform }}-portable.zip" -Force
+          Write-Host "Using: $iscc"
+          & $iscc installer.iss /dPlatform=${{ matrix.platform }}
+          Write-Host "=== Installer output ==="
+          Get-ChildItem -Path "bin\${{ matrix.platform }}\Release" -Filter "*-Setup.exe" | Select-Object FullName, Length
 
-      - name: Upload Portable ZIP
+      - name: Upload Installer
         uses: actions/upload-artifact@v4
         with:
-          name: FluentFold-${{ matrix.platform }}-portable
-          path: FluentFold-${{ matrix.platform }}-portable.zip
-          if-no-files-found: warn
+          name: FluentFold-${{ matrix.platform }}-Setup
+          path: bin/${{ matrix.platform }}/Release/FluentFold-${{ matrix.platform }}-Setup.exe
+          if-no-files-found: error
