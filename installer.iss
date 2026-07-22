@@ -25,6 +25,7 @@ SolidCompression=yes
 WizardStyle=modern
 UninstallDisplayIcon={app}\{#MyAppExeName}
 PrivilegesRequired=admin
+SetupIconFile={#SourcePath}Assets\AppIcon.ico
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"

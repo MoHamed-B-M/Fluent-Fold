@@ -33,11 +33,17 @@ public sealed partial class MainWindow : Window
         SetTitleBar(AppTitleBar);
 
         var appWindow = AppWindow;
-        var iconPath = Path.Combine(AppContext.BaseDirectory, "Assets", "AppIcon.ico");
-        if (File.Exists(iconPath))
+        var iconPaths = new[]
+        {
+            Path.Combine(AppContext.BaseDirectory, "Assets", "AppIcon.ico"),
+            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "AppIcon.ico"),
+            Path.GetFullPath("Assets/AppIcon.ico"),
+        };
+        var iconPath = iconPaths.FirstOrDefault(File.Exists);
+        if (iconPath is not null)
             appWindow.SetIcon(iconPath);
         else
-            appWindow.SetIcon("Assets/AppIcon.ico");
+            _logger.LogWarning("AppIcon.ico not found at any checked path");
 
         var ws = (WindowService)serviceProvider.GetRequiredService<IWindowService>();
         ws.WindowHandle = WindowNative.GetWindowHandle(this);
