@@ -32,19 +32,6 @@ public sealed partial class MainWindow : Window
         ExtendsContentIntoTitleBar = true;
         SetTitleBar(AppTitleBar);
 
-        var appWindow = AppWindow;
-        var iconPaths = new[]
-        {
-            Path.Combine(AppContext.BaseDirectory, "Assets", "AppIcon.ico"),
-            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "AppIcon.ico"),
-            Path.GetFullPath("Assets/AppIcon.ico"),
-        };
-        var iconPath = iconPaths.FirstOrDefault(File.Exists);
-        if (iconPath is not null)
-            appWindow.SetIcon(iconPath);
-        else
-            _logger.LogWarning("AppIcon.ico not found at any checked path");
-
         var ws = (WindowService)serviceProvider.GetRequiredService<IWindowService>();
         ws.WindowHandle = WindowNative.GetWindowHandle(this);
 
@@ -56,9 +43,27 @@ public sealed partial class MainWindow : Window
     private async void OnActivated(object sender, WindowActivatedEventArgs e)
     {
         Activated -= OnActivated;
+        SetAppIcon();
         ViewModel.Initialize(ContentFrame);
         await Task.Delay(200);
         ShowOnboarding();
+    }
+
+    private void SetAppIcon()
+    {
+        var paths = new[]
+        {
+            Path.Combine(AppContext.BaseDirectory, "Assets", "AppIcon.ico"),
+            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "AppIcon.ico"),
+            Path.GetFullPath("Assets/AppIcon.ico"),
+        };
+        var path = paths.FirstOrDefault(File.Exists);
+        if (path is null)
+        {
+            _logger.LogWarning("AppIcon.ico not found");
+            return;
+        }
+        try { AppWindow.SetIcon(path); } catch (Exception ex) { _logger.LogWarning("SetIcon failed: {Ex}", ex.Message); }
     }
 
     public void ShowOnboarding()
