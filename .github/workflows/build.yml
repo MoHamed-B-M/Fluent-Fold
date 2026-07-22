@@ -44,19 +44,19 @@ jobs:
             --no-restore
 
       - name: Sign MSIX (if certificate secrets configured)
-        if: env.CERT_BASE64 != '' && env.CERT_PASSWORD != ''
+        if: ${{ secrets.CERT_BASE64 != '' && secrets.CERT_PASSWORD != '' }}
         shell: pwsh
         env:
           CERT_BASE64: ${{ secrets.CERT_BASE64 }}
           CERT_PASSWORD: ${{ secrets.CERT_PASSWORD }}
         run: |
-          $msix = Get-ChildItem -Recurse -Filter "*.msix" | Select-Object -First 1 -ExpandProperty FullName
-          if (-not $msix) { throw "No MSIX found to sign" }
+          $signtool = "${env:ProgramFiles(x86)}\Windows Kits\10\bin\*\x64\signtool.exe"
           $pfxPath = "$env:RUNNER_TEMP\signing.pfx"
           [IO.File]::WriteAllBytes($pfxPath, [Convert]::FromBase64String($env:CERT_BASE64))
-          $signtool = "${env:ProgramFiles(x86)}\Windows Kits\10\bin\*\x64\signtool.exe"
-          & $signtool sign /fd SHA256 /a /f $pfxPath /p $env:CERT_PASSWORD $msix
-          Write-Host "Signed: $msix"
+          Get-ChildItem -Recurse -Filter "*.msix" | ForEach-Object {
+            & $signtool sign /fd SHA256 /a /f $pfxPath /p $env:CERT_PASSWORD $_.FullName
+            Write-Host "Signed: $($_.Name)"
+          }
 
       - name: Upload MSIX Artifacts
         uses: actions/upload-artifact@v4
