@@ -1,0 +1,71 @@
+<Page
+    x:Class="FluentFold.Views.AboutPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Grid Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}" Padding="24">
+        <ScrollViewer>
+            <StackPanel Spacing="24" HorizontalAlignment="Center" MaxWidth="600">
+
+                <TextBlock Text="About FluentFold" Style="{StaticResource TitleTextBlockStyle}" />
+
+                <!-- Card 1: The Story -->
+                <Border Style="{StaticResource SettingsCardStyle}" Padding="24">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="Our Mission" FontWeight="SemiBold" FontSize="18" />
+                        <TextBlock TextWrapping="Wrap" FontSize="14"
+                                   LineHeight="22"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}">
+                            FluentFold was born out of a personal need for order in a digital world.
+                            I built this app because I needed it, and I know you do too.
+                            My goal is to simplify your workflow and reclaim your time.
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+
+                <!-- Card 2: Developer -->
+                <Border Style="{StaticResource SettingsCardStyle}" Padding="24">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="Connect" FontWeight="SemiBold" FontSize="18" />
+                        <HyperlinkButton Click="OnGitHubClick" Padding="0">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}"
+                                          Glyph="&#xE8E8;"
+                                          FontSize="18"
+                                          Foreground="{ThemeResource SystemAccentColor}" />
+                                <TextBlock Text="GitHub" VerticalAlignment="Center"
+                                           FontSize="14"
+                                           Foreground="{ThemeResource SystemAccentColor}" />
+                            </StackPanel>
+                        </HyperlinkButton>
+                    </StackPanel>
+                </Border>
+
+                <!-- Card 3: Value Proposition -->
+                <Border Style="{StaticResource SettingsCardStyle}" Padding="24">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="Why FluentFold?" FontWeight="SemiBold" FontSize="18" />
+                        <TextBlock TextWrapping="Wrap" FontSize="16"
+                                   FontWeight="Bold"
+                                   HorizontalAlignment="Center"
+                                   TextAlignment="Center"
+                                   Foreground="{ThemeResource TextFillColorPrimaryBrush}">
+                            Make your life easier by organizing your files.
+                            Reclaim your digital space, one folder at a time.
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+
+                <!-- Version -->
+                <TextBlock x:Name="VersionText"
+                           Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                           HorizontalAlignment="Center"
+                           FontSize="12" />
+
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Page>

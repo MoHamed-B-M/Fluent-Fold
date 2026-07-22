@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" id="root">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1"/>
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2"/>
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string"/>
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="OperationFailed" xml:space="preserve"><value>Operation failed: {0}</value></data>
+  <data name="UndoFailed" xml:space="preserve"><value>Undo failed: {0}</value></data>
+  <data name="RestoreFailed" xml:space="preserve"><value>Restore failed: {0}</value></data>
+  <data name="RenameFailed" xml:space="preserve"><value>Rename failed: {0}</value></data>
+  <data name="ScanFailed" xml:space="preserve"><value>Scan failed: {0}</value></data>
+  <data name="DuplicateScanFailed" xml:space="preserve"><value>Duplicate scan failed: {0}</value></data>
+  <data name="ExtensionRequired" xml:space="preserve"><value>Extension and category name are required.</value></data>
+  <data name="RuleAlreadyExists" xml:space="preserve"><value>Rule for '{0}' already exists.</value></data>
+  <data name="TriggerRequired" xml:space="preserve"><value>Trigger value and category name are required.</value></data>
+  <data name="FileNotFound" xml:space="preserve"><value>File not found: {0}</value></data>
+  <data name="FolderNotFound" xml:space="preserve"><value>Folder not found: {0}</value></data>
+  <data name="AccessDenied" xml:space="preserve"><value>Access denied: {0}</value></data>
+</root>

@@ -6,7 +6,86 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <Grid>
-        <TextBlock Text="Settings" Style="{StaticResource TitleTextBlockStyle}" />
+    <Grid Padding="24">
+        <ScrollViewer>
+            <StackPanel Spacing="24">
+                <TextBlock Text="Settings" Style="{StaticResource TitleTextBlockStyle}" />
+
+                <Border Style="{StaticResource SettingsCardStyle}" Padding="20">
+                    <StackPanel Spacing="14">
+                        <TextBlock Text="Notifications" FontWeight="SemiBold" FontSize="16" />
+                        <ToggleSwitch Header="Enable Notifications" OnContent="On" OffContent="Off"
+                                      IsOn="{x:Bind ViewModel.EnableNotifications, Mode=TwoWay}" />
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource SettingsCardStyle}" Padding="20">
+                    <StackPanel Spacing="14">
+                        <TextBlock Text="Organization" FontWeight="SemiBold" FontSize="16" />
+                        <ComboBox Header="Default Organization Mode"
+                                  ItemsSource="{x:Bind ViewModel.OrganizationModes}"
+                                  SelectedItem="{x:Bind ViewModel.DefaultOrganizationMode, Mode=TwoWay}"
+                                  Width="240" HorizontalAlignment="Left" />
+                        <ToggleSwitch Header="Keep Folder Structure" OnContent="On" OffContent="Off"
+                                      IsOn="{x:Bind ViewModel.KeepFolderStructure, Mode=TwoWay}" />
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource SettingsCardStyle}" Padding="20">
+                    <StackPanel Spacing="14">
+                        <TextBlock Text="Teaching Tips" FontWeight="SemiBold" FontSize="16" />
+                        <ToggleSwitch Header="Show teaching tips on first launch" OnContent="On" OffContent="Off"
+                                      IsOn="{x:Bind ViewModel.ShowTeachingTips, Mode=TwoWay}" />
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource SettingsCardStyle}" Padding="20">
+                    <StackPanel Spacing="14">
+                        <TextBlock Text="App Mode" FontWeight="SemiBold" FontSize="16" />
+                        <ComboBox Header="Experience Mode"
+                                  ItemsSource="{x:Bind ViewModel.AppModes}"
+                                  SelectedItem="{x:Bind ViewModel.AppMode, Mode=TwoWay}"
+                                  Width="240" HorizontalAlignment="Left" />
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource SettingsCardStyle}" Padding="20">
+                    <StackPanel Spacing="14">
+                        <TextBlock Text="Safety" FontWeight="SemiBold" FontSize="16" />
+                        <ToggleSwitch Header="Use Recycle Bin when deleting files" OnContent="On" OffContent="Off"
+                                      IsOn="{x:Bind ViewModel.UseRecycleBin, Mode=TwoWay}" />
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource SettingsCardStyle}" Padding="20">
+                    <StackPanel Spacing="14">
+                        <TextBlock Text="Appearance" FontWeight="SemiBold" FontSize="16" />
+                        <StackPanel Orientation="Horizontal" Spacing="16">
+                            <RadioButton Content="System" GroupName="ThemeGroup"
+                                         IsChecked="{x:Bind ViewModel.IsSystemTheme, Mode=OneWay}"
+                                         Command="{x:Bind ViewModel.SetThemeCommand}" CommandParameter="System" />
+                            <RadioButton Content="Light" GroupName="ThemeGroup"
+                                         IsChecked="{x:Bind ViewModel.IsLightTheme, Mode=OneWay}"
+                                         Command="{x:Bind ViewModel.SetThemeCommand}" CommandParameter="Light" />
+                            <RadioButton Content="Dark" GroupName="ThemeGroup"
+                                         IsChecked="{x:Bind ViewModel.IsDarkTheme, Mode=OneWay}"
+                                         Command="{x:Bind ViewModel.SetThemeCommand}" CommandParameter="Dark" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource SettingsCardStyle}" Padding="20">
+                    <StackPanel Spacing="14">
+                        <TextBlock Text="Onboarding" FontWeight="SemiBold" FontSize="16" />
+                        <Button Content="Reset Onboarding" Click="OnResetOnboardingClick" />
+                    </StackPanel>
+                </Border>
+
+                <StackPanel Orientation="Horizontal" Spacing="12">
+                    <Button Content="Save" Click="OnSaveClick" Style="{StaticResource AccentButtonStyle}" />
+                    <Button Content="Reset to Defaults" Command="{x:Bind ViewModel.ResetToDefaultsCommand}" />
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
     </Grid>
 </Page>

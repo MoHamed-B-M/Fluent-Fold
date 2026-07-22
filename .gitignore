@@ -31,3 +31,14 @@ BundleArtifacts/
 # OS files
 Thumbs.db
 .DS_Store
+
+# Agent/IDE tool config
+.agents/
+.claude/
+.continue/
+
+# Certificates
+*.pfx
+
+# Skill lock files
+skills-lock.json

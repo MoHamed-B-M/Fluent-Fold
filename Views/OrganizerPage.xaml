@@ -4,9 +4,506 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:models="using:FluentFold.Models"
     mc:Ignorable="d">
 
-    <Grid>
-        <TextBlock Text="Organizer" Style="{StaticResource TitleTextBlockStyle}" />
+    <Grid Padding="24">
+        <ScrollViewer>
+            <StackPanel Spacing="20">
+
+                <!-- Cleanup Suggestion -->
+                <InfoBar
+                    x:Name="CleanupSuggestionBar"
+                    x:Load="{x:Bind ViewModel.ShowCleanupSuggestion, Mode=OneWay}"
+                    IsOpen="True" Severity="Warning" IsClosable="True"
+                    Message="{x:Bind ViewModel.CleanupSuggestionMessage, Mode=OneWay}"
+                    CloseButtonCommand="{x:Bind ViewModel.DismissCleanupSuggestionCommand}">
+                    <InfoBar.ActionButton>
+                        <Button Content="&#xE74D;" FontFamily="{ThemeResource SymbolThemeFontFamily}"
+                                FontSize="16" Click="OnCleanupActionClick"
+                                ToolTipService.ToolTip="Review &amp; Delete" />
+                    </InfoBar.ActionButton>
+                </InfoBar>
+
+                <!-- Shared InfoBar -->
+                <InfoBar
+                    IsOpen="{x:Bind ViewModel.IsInfoBarOpen, Mode=TwoWay}"
+                    Message="{x:Bind ViewModel.InfoBarMessage, Mode=OneWay}"
+                    Severity="{x:Bind ViewModel.InfoBarSeverity, Mode=OneWay}"
+                    IsClosable="True" />
+
+                <!-- ====== STANDARD MODE ====== -->
+                <StackPanel x:Name="StandardLayout" x:Load="{x:Bind ViewModel.IsStandardMode, Mode=OneWay}" Spacing="20">
+
+                    <Border Style="{StaticResource HeroCardStyle}">
+                        <StackPanel Spacing="20" HorizontalAlignment="Center">
+                            <TextBlock Text="&#xE8B7;" FontFamily="{ThemeResource SymbolThemeFontFamily}"
+                                       FontSize="56" HorizontalAlignment="Center"
+                                       Foreground="{ThemeResource SystemAccentColor}" />
+                            <StackPanel Spacing="4" HorizontalAlignment="Center">
+                                <TextBlock Text="FluentFold" FontSize="28" FontWeight="Bold" HorizontalAlignment="Center" />
+                                <TextBlock Text="Organize your files in seconds" FontSize="14"
+                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                            </StackPanel>
+                            <Button Command="{x:Bind ViewModel.PickFolderCommand}" HorizontalAlignment="Center"
+                                    Width="48" Height="48" CornerRadius="24" FontSize="18"
+                                    Background="{ThemeResource SystemAccentColor}" Foreground="White" BorderThickness="0"
+                                    PointerEntered="Button_PointerEntered" PointerExited="Button_PointerExited"
+                                    PointerPressed="Button_PointerPressed" PointerReleased="Button_PointerReleased"
+                                    ToolTipService.ToolTip="Select a folder">
+                                <TextBlock Text="&#xE838;" FontFamily="{ThemeResource SymbolThemeFontFamily}" />
+                            </Button>
+                            <TextBlock Text="{x:Bind ViewModel.SelectedFolderPath, Mode=OneWay}"
+                                       Visibility="{x:Bind ViewModel.HasFolder, Mode=OneWay}"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                       TextTrimming="CharacterEllipsis" HorizontalAlignment="Center" FontSize="13" />
+                            <StackPanel x:Name="FolderSelectedState" x:Load="{x:Bind ViewModel.HasFolder, Mode=OneWay}"
+                                        HorizontalAlignment="Stretch">
+                                <Button x:Name="HeroOrganizeButton"
+                                        Command="{x:Bind ViewModel.OrganizeCommand}"
+                                        Content="&#xE768;" FontFamily="{ThemeResource SymbolThemeFontFamily}" FontSize="24"
+                                        Style="{StaticResource HeroStartButtonStyle}"
+                                        IsEnabled="{x:Bind ViewModel.CanOrganize, Mode=OneWay}"
+                                        PointerEntered="Button_PointerEntered" PointerExited="Button_PointerExited"
+                                        PointerPressed="Button_PointerPressed" PointerReleased="Button_PointerReleased"
+                                        ToolTipService.ToolTip="Start Organizing" />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="8"
+                                        Visibility="{x:Bind ViewModel.HasFolder, Mode=OneWay}">
+                                <Button Command="{x:Bind ViewModel.UndoCommand}" Content="&#xE7A7;"
+                                        FontFamily="{ThemeResource SymbolThemeFontFamily}" FontSize="16"
+                                        IsEnabled="{x:Bind ViewModel.CanUndo, Mode=OneWay}"
+                                        PointerEntered="Button_PointerEntered" PointerExited="Button_PointerExited"
+                                        PointerPressed="Button_PointerPressed" PointerReleased="Button_PointerReleased"
+                                        ToolTipService.ToolTip="Undo" />
+                                <Button Command="{x:Bind ViewModel.RestoreAllCommand}" Content="&#xE777;"
+                                        FontFamily="{ThemeResource SymbolThemeFontFamily}" FontSize="16"
+                                        IsEnabled="{x:Bind ViewModel.CanUndo, Mode=OneWay}"
+                                        PointerEntered="Button_PointerEntered" PointerExited="Button_PointerExited"
+                                        PointerPressed="Button_PointerPressed" PointerReleased="Button_PointerReleased"
+                                        ToolTipService.ToolTip="Restore All" />
+                                <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center"
+                                            Visibility="{x:Bind ViewModel.IsWorking, Mode=OneWay}">
+                                    <ProgressBar Value="{x:Bind ViewModel.ProgressValue, Mode=OneWay}"
+                                                 IsIndeterminate="False" Width="140" VerticalAlignment="Center" />
+                                    <TextBlock Text="{x:Bind ViewModel.ProgressPercent, Mode=OneWay}"
+                                               VerticalAlignment="Center" FontSize="12"
+                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                </StackPanel>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="8"
+                                Visibility="{x:Bind ViewModel.HasFolder, Mode=OneWay}">
+                        <Border Style="{StaticResource StatCardStyle}">
+                            <StackPanel HorizontalAlignment="Center" Spacing="2">
+                                <TextBlock Text="&#xE722;" FontFamily="{ThemeResource SymbolThemeFontFamily}"
+                                           FontSize="18" HorizontalAlignment="Center" Foreground="{ThemeResource SystemAccentColor}" />
+                                <TextBlock Text="{x:Bind ViewModel.ImageCount, Mode=OneWay}" FontWeight="Bold" HorizontalAlignment="Center" />
+                                <TextBlock Text="Images" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                            </StackPanel>
+                        </Border>
+                        <Border Style="{StaticResource StatCardStyle}">
+                            <StackPanel HorizontalAlignment="Center" Spacing="2">
+                                <TextBlock Text="&#xE8A5;" FontFamily="{ThemeResource SymbolThemeFontFamily}"
+                                           FontSize="18" HorizontalAlignment="Center" Foreground="{ThemeResource SystemAccentColor}" />
+                                <TextBlock Text="{x:Bind ViewModel.DocumentCount, Mode=OneWay}" FontWeight="Bold" HorizontalAlignment="Center" />
+                                <TextBlock Text="Documents" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                            </StackPanel>
+                        </Border>
+                        <Border Style="{StaticResource StatCardStyle}">
+                            <StackPanel HorizontalAlignment="Center" Spacing="2">
+                                <TextBlock Text="&#xE714;" FontFamily="{ThemeResource SymbolThemeFontFamily}"
+                                           FontSize="18" HorizontalAlignment="Center" Foreground="{ThemeResource SystemAccentColor}" />
+                                <TextBlock Text="{x:Bind ViewModel.VideoCount, Mode=OneWay}" FontWeight="Bold" HorizontalAlignment="Center" />
+                                <TextBlock Text="Videos" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                            </StackPanel>
+                        </Border>
+                        <Border Style="{StaticResource StatCardStyle}">
+                            <StackPanel HorizontalAlignment="Center" Spacing="2">
+                                <TextBlock Text="&#xE8D6;" FontFamily="{ThemeResource SymbolThemeFontFamily}"
+                                           FontSize="18" HorizontalAlignment="Center" Foreground="{ThemeResource SystemAccentColor}" />
+                                <TextBlock Text="{x:Bind ViewModel.AudioCount, Mode=OneWay}" FontWeight="Bold" HorizontalAlignment="Center" />
+                                <TextBlock Text="Audio" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                            </StackPanel>
+                        </Border>
+                        <Border Style="{StaticResource StatCardStyle}">
+                            <StackPanel HorizontalAlignment="Center" Spacing="2">
+                                <TextBlock Text="&#xE773;" FontFamily="{ThemeResource SymbolThemeFontFamily}"
+                                           FontSize="18" HorizontalAlignment="Center" Foreground="{ThemeResource SystemAccentColor}" />
+                                <TextBlock Text="{x:Bind ViewModel.ArchiveCount, Mode=OneWay}" FontWeight="Bold" HorizontalAlignment="Center" />
+                                <TextBlock Text="Archives" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                            </StackPanel>
+                        </Border>
+                        <Border Style="{StaticResource StatCardStyle}">
+                            <StackPanel HorizontalAlignment="Center" Spacing="2">
+                                <TextBlock Text="&#xE943;" FontFamily="{ThemeResource SymbolThemeFontFamily}"
+                                           FontSize="18" HorizontalAlignment="Center" Foreground="{ThemeResource SystemAccentColor}" />
+                                <TextBlock Text="{x:Bind ViewModel.CodeCount, Mode=OneWay}" FontWeight="Bold" HorizontalAlignment="Center" />
+                                <TextBlock Text="Code" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                            </StackPanel>
+                        </Border>
+                        <Border Style="{StaticResource StatCardStyle}">
+                            <StackPanel HorizontalAlignment="Center" Spacing="2">
+                                <TextBlock Text="&#xE771;" FontFamily="{ThemeResource SymbolThemeFontFamily}"
+                                           FontSize="18" HorizontalAlignment="Center" Foreground="{ThemeResource SystemAccentColor}" />
+                                <TextBlock Text="{x:Bind ViewModel.OtherCount, Mode=OneWay}" FontWeight="Bold" HorizontalAlignment="Center" />
+                                <TextBlock Text="Other" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- ====== PRO MODE ====== -->
+                <StackPanel x:Name="ProLayout" x:Load="{x:Bind ViewModel.IsProMode, Mode=OneWay}" Spacing="20">
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Organizer" Style="{StaticResource TitleTextBlockStyle}" />
+                        <Border Grid.Column="2" Background="{ThemeResource SystemAccentColor}" CornerRadius="6" Padding="8,3">
+                            <TextBlock Text="PRO" FontWeight="Bold" FontSize="11" Foreground="White" VerticalAlignment="Center" />
+                        </Border>
+                    </Grid>
+
+                    <Border Style="{StaticResource FluentCardStyle}" Padding="20">
+                        <StackPanel Spacing="12">
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <Button Command="{x:Bind ViewModel.PickFolderCommand}" Width="36" Height="36"
+                                        PointerEntered="Button_PointerEntered" PointerExited="Button_PointerExited"
+                                        PointerPressed="Button_PointerPressed" PointerReleased="Button_PointerReleased"
+                                        ToolTipService.ToolTip="Select Folder">
+                                    <TextBlock Text="&#xE838;" FontFamily="{ThemeResource SymbolThemeFontFamily}" FontSize="14" />
+                                </Button>
+                                <TextBlock Text="{x:Bind ViewModel.SelectedFolderPath, Mode=OneWay}"
+                                           VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                           TextTrimming="CharacterEllipsis" />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Button x:Name="OrganizeButton" Command="{x:Bind ViewModel.OrganizeCommand}"
+                                        IsEnabled="{x:Bind ViewModel.CanOrganize, Mode=OneWay}" Width="36" Height="36"
+                                        PointerEntered="Button_PointerEntered" PointerExited="Button_PointerExited"
+                                        PointerPressed="Button_PointerPressed" PointerReleased="Button_PointerReleased"
+                                        ToolTipService.ToolTip="Organize Files">
+                                    <TextBlock Text="&#xE768;" FontFamily="{ThemeResource SymbolThemeFontFamily}" FontSize="14" />
+                                </Button>
+                                <Button Command="{x:Bind ViewModel.UndoCommand}"
+                                        IsEnabled="{x:Bind ViewModel.CanUndo, Mode=OneWay}" Width="36" Height="36"
+                                        PointerEntered="Button_PointerEntered" PointerExited="Button_PointerExited"
+                                        PointerPressed="Button_PointerPressed" PointerReleased="Button_PointerReleased"
+                                        ToolTipService.ToolTip="Undo">
+                                    <TextBlock Text="&#xE7A7;" FontFamily="{ThemeResource SymbolThemeFontFamily}" FontSize="14" />
+                                </Button>
+                                <Button Command="{x:Bind ViewModel.RestoreAllCommand}"
+                                        IsEnabled="{x:Bind ViewModel.CanUndo, Mode=OneWay}" Width="36" Height="36"
+                                        PointerEntered="Button_PointerEntered" PointerExited="Button_PointerExited"
+                                        PointerPressed="Button_PointerPressed" PointerReleased="Button_PointerReleased"
+                                        ToolTipService.ToolTip="Restore All">
+                                    <TextBlock Text="&#xE777;" FontFamily="{ThemeResource SymbolThemeFontFamily}" FontSize="14" />
+                                </Button>
+                                <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center"
+                                            Visibility="{x:Bind ViewModel.IsWorking, Mode=OneWay}">
+                                    <ProgressBar Value="{x:Bind ViewModel.ProgressValue, Mode=OneWay}"
+                                                 IsIndeterminate="False" Width="130" VerticalAlignment="Center" />
+                                    <TextBlock Text="{x:Bind ViewModel.ProgressPercent, Mode=OneWay}"
+                                               VerticalAlignment="Center" FontSize="12"
+                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                </StackPanel>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Style="{StaticResource FluentCardStyle}" Padding="20">
+                        <StackPanel Spacing="12">
+                            <TextBlock Text="Statistics" FontWeight="SemiBold" FontSize="16" />
+                            <Grid ColumnSpacing="8" RowSpacing="8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Border Grid.Column="0" Grid.Row="0" Style="{StaticResource StatCardStyle}">
+                                    <StackPanel Spacing="2">
+                                        <TextBlock Text="Images" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                        <TextBlock Text="{x:Bind ViewModel.ImageCount, Mode=OneWay}" FontSize="22" FontWeight="Bold" />
+                                    </StackPanel>
+                                </Border>
+                                <Border Grid.Column="1" Grid.Row="0" Style="{StaticResource StatCardStyle}">
+                                    <StackPanel Spacing="2">
+                                        <TextBlock Text="Documents" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                        <TextBlock Text="{x:Bind ViewModel.DocumentCount, Mode=OneWay}" FontSize="22" FontWeight="Bold" />
+                                    </StackPanel>
+                                </Border>
+                                <Border Grid.Column="2" Grid.Row="0" Style="{StaticResource StatCardStyle}">
+                                    <StackPanel Spacing="2">
+                                        <TextBlock Text="Videos" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                        <TextBlock Text="{x:Bind ViewModel.VideoCount, Mode=OneWay}" FontSize="22" FontWeight="Bold" />
+                                    </StackPanel>
+                                </Border>
+                                <Border Grid.Column="3" Grid.Row="0" Style="{StaticResource StatCardStyle}">
+                                    <StackPanel Spacing="2">
+                                        <TextBlock Text="Audio" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                        <TextBlock Text="{x:Bind ViewModel.AudioCount, Mode=OneWay}" FontSize="22" FontWeight="Bold" />
+                                    </StackPanel>
+                                </Border>
+                                <Border Grid.Column="0" Grid.Row="1" Style="{StaticResource StatCardStyle}">
+                                    <StackPanel Spacing="2">
+                                        <TextBlock Text="Archives" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                        <TextBlock Text="{x:Bind ViewModel.ArchiveCount, Mode=OneWay}" FontSize="22" FontWeight="Bold" />
+                                    </StackPanel>
+                                </Border>
+                                <Border Grid.Column="1" Grid.Row="1" Style="{StaticResource StatCardStyle}">
+                                    <StackPanel Spacing="2">
+                                        <TextBlock Text="Code" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                        <TextBlock Text="{x:Bind ViewModel.CodeCount, Mode=OneWay}" FontSize="22" FontWeight="Bold" />
+                                    </StackPanel>
+                                </Border>
+                                <Border Grid.Column="2" Grid.Row="1" Style="{StaticResource StatCardStyle}">
+                                    <StackPanel Spacing="2">
+                                        <TextBlock Text="Other" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                        <TextBlock Text="{x:Bind ViewModel.OtherCount, Mode=OneWay}" FontSize="22" FontWeight="Bold" />
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Style="{StaticResource FluentCardStyle}" Padding="20">
+                        <StackPanel Spacing="16">
+                            <TextBlock Text="Control Panel" FontWeight="SemiBold" FontSize="16" />
+
+                            <Border Background="{ThemeResource CardBackgroundFillColorSecondary}" CornerRadius="8" Padding="14">
+                                <StackPanel Spacing="10">
+                                    <TextBlock Text="&#xE943; Custom Rules" FontWeight="SemiBold" FontSize="14" />
+                                    <Grid ColumnSpacing="8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="100" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBox Grid.Column="0"
+                                                 Text="{x:Bind ViewModel.NewRuleExtension, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                 PlaceholderText=".pdf" />
+                                        <TextBox Grid.Column="1"
+                                                 Text="{x:Bind ViewModel.NewRuleCategoryName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                 PlaceholderText="Category name" />
+                                        <Button Grid.Column="2" Command="{x:Bind ViewModel.AddCustomRuleCommand}"
+                                                Content="&#xE109;" FontFamily="{ThemeResource SymbolThemeFontFamily}" FontSize="12"
+                                                Width="32" Height="32"
+                                                ToolTipService.ToolTip="Add Rule" />
+                                    </Grid>
+                                    <ListView ItemsSource="{x:Bind ViewModel.CustomRules, Mode=OneWay}" MaxHeight="140">
+                                        <ListView.ItemTemplate>
+                                            <DataTemplate x:DataType="models:ExtensionRule">
+                                                <Grid ColumnSpacing="8">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="100" />
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="Auto" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Grid.Column="0" Text="{x:Bind Extension}" FontFamily="Consolas" />
+                                                    <TextBlock Grid.Column="1" Text="{x:Bind CategoryName}" />
+                                                    <Button Grid.Column="2" Content="✕" FontSize="11" Width="28" Height="28"
+                                                            Click="OnRemoveRuleClick" />
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ListView.ItemTemplate>
+                                    </ListView>
+                                    <TextBox Text="{x:Bind ViewModel.FolderNamingPattern, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                             PlaceholderText="Folder pattern: {category}, {YYYY}-{MM}_{category}, etc."
+                                             Header="Folder Naming Pattern" />
+                                </StackPanel>
+                            </Border>
+
+                            <Border Background="{ThemeResource CardBackgroundFillColorSecondary}" CornerRadius="8" Padding="14">
+                                <StackPanel Spacing="10">
+                                    <TextBlock Text="&#xE943; Trigger Rules" FontWeight="SemiBold" FontSize="14" />
+                                    <Grid ColumnSpacing="8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="100" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <ComboBox Grid.Column="0" SelectedIndex="{x:Bind ViewModel.NewTriggerTypeIndex, Mode=TwoWay}"
+                                                  HorizontalAlignment="Stretch">
+                                            <x:String>Contains</x:String>
+                                            <x:String>Starts With</x:String>
+                                            <x:String>Ends With</x:String>
+                                            <x:String>Regex</x:String>
+                                        </ComboBox>
+                                        <TextBox Grid.Column="1"
+                                                 Text="{x:Bind ViewModel.NewTriggerValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                 PlaceholderText="Trigger value" />
+                                        <TextBox Grid.Column="2" Width="100"
+                                                 Text="{x:Bind ViewModel.NewTriggerCategoryName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                 PlaceholderText="Category" />
+                                    </Grid>
+                                    <Button Command="{x:Bind ViewModel.AddTriggerRuleCommand}"
+                                            Content="&#xE109;" FontFamily="{ThemeResource SymbolThemeFontFamily}" FontSize="12"
+                                            Width="32" Height="32" ToolTipService.ToolTip="Add Trigger Rule" />
+                                    <ListView ItemsSource="{x:Bind ViewModel.RuleModels, Mode=OneWay}" MaxHeight="140">
+                                        <ListView.ItemTemplate>
+                                            <DataTemplate x:DataType="models:RuleModel">
+                                                <Grid ColumnSpacing="8">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="80" />
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="Auto" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Grid.Column="0" Text="{x:Bind TriggerType}" FontSize="12" />
+                                                    <TextBlock Grid.Column="1" Text="{x:Bind TriggerValue}" TextTrimming="CharacterEllipsis" />
+                                                    <TextBlock Grid.Column="1" Text="→" HorizontalAlignment="Center" />
+                                                    <TextBlock Grid.Column="1" Text="{x:Bind TargetCategory}" />
+                                                    <Button Grid.Column="2" Content="✕" FontSize="11" Width="28" Height="28"
+                                                            Click="OnRemoveTriggerRuleClick" />
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ListView.ItemTemplate>
+                                    </ListView>
+                                </StackPanel>
+                            </Border>
+
+                            <Border Background="{ThemeResource CardBackgroundFillColorSecondary}" CornerRadius="8" Padding="14">
+                                <StackPanel Spacing="10">
+                                    <TextBlock Text="&#xE8AC; Rename Files" FontWeight="SemiBold" FontSize="14" />
+                                    <Grid ColumnSpacing="8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="70" />
+                                            <ColumnDefinition Width="70" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBox Grid.Column="0"
+                                                 Text="{x:Bind ViewModel.RenamePattern, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                 PlaceholderText="Pattern: {name}_{n}{ext}" />
+                                        <TextBox Grid.Column="1"
+                                                 Text="{x:Bind ViewModel.RenameStartNumber, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                 PlaceholderText="Start" />
+                                        <TextBox Grid.Column="2"
+                                                 Text="{x:Bind ViewModel.RenamePadding, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                 PlaceholderText="Pad" />
+                                    </Grid>
+                                    <Button Command="{x:Bind ViewModel.RenameCommand}"
+                                            IsEnabled="{x:Bind ViewModel.CanOrganize, Mode=OneWay}"
+                                            Width="36" Height="36"
+                                            ToolTipService.ToolTip="Apply Rename">
+                                        <TextBlock Text="&#xE8AC;" FontFamily="{ThemeResource SymbolThemeFontFamily}" FontSize="14" />
+                                    </Button>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Style="{StaticResource FluentCardStyle}" Padding="20">
+                        <StackPanel Spacing="8">
+                            <Grid Visibility="{x:Bind ViewModel.HasFolder, Mode=OneWay}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="Files" FontWeight="SemiBold" FontSize="16" VerticalAlignment="Center" />
+                                <ComboBox Grid.Column="1"
+                                          ItemsSource="{x:Bind ViewModel.SortModes}"
+                                          SelectedItem="{x:Bind ViewModel.SortMode, Mode=TwoWay}"
+                                          HorizontalAlignment="Right" VerticalAlignment="Center"
+                                          Width="140" Margin="0,0,8,0" />
+                                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                    <Button Command="{x:Bind ViewModel.SetListViewCommand}" Content="&#xE992;"
+                                            PointerEntered="Button_PointerEntered" PointerExited="Button_PointerExited"
+                                            PointerPressed="Button_PointerPressed" PointerReleased="Button_PointerReleased"
+                                            Width="32" Height="32" />
+                                    <Button Command="{x:Bind ViewModel.SetGridViewCommand}" Content="&#xE8A9;"
+                                            PointerEntered="Button_PointerEntered" PointerExited="Button_PointerExited"
+                                            PointerPressed="Button_PointerPressed" PointerReleased="Button_PointerReleased"
+                                            Width="32" Height="32" />
+                                </StackPanel>
+                            </Grid>
+
+                            <ListView x:Name="FileListView"
+                                      ItemsSource="{x:Bind ViewModel.Files, Mode=OneWay}"
+                                      MaxHeight="360"
+                                      x:Load="{x:Bind ViewModel.IsListView, Mode=OneWay}"
+                                      Visibility="{x:Bind ViewModel.HasFolder, Mode=OneWay}">
+                                <ListView.Header>
+                                    <Grid Padding="12,4" ColumnSpacing="8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="2*" />
+                                            <ColumnDefinition Width="100" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0" Text="Name" FontWeight="SemiBold" />
+                                        <TextBlock Grid.Column="1" Text="Category" FontWeight="SemiBold" />
+                                        <TextBlock Grid.Column="2" Text="Modified" FontWeight="SemiBold" />
+                                    </Grid>
+                                </ListView.Header>
+                                <ListView.ItemTemplate>
+                                    <DataTemplate x:DataType="models:FileEntry">
+                                        <Grid Padding="12,4" ColumnSpacing="8">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="2*" />
+                                                <ColumnDefinition Width="100" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="{x:Bind Name}" TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Grid.Column="1" Text="{x:Bind Category}" />
+                                            <TextBlock Grid.Column="2" Text="{x:Bind DateModified}" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                            </ListView>
+
+                            <GridView x:Name="FileGridView"
+                                      ItemsSource="{x:Bind ViewModel.Files, Mode=OneWay}"
+                                      MaxHeight="360" SelectionMode="None"
+                                      x:Load="{x:Bind ViewModel.IsGridView, Mode=OneWay}"
+                                      Visibility="{x:Bind ViewModel.HasFolder, Mode=OneWay}">
+                                <GridView.ItemTemplate>
+                                    <DataTemplate x:DataType="models:FileEntry">
+                                        <Border Width="110" Height="110" CornerRadius="10"
+                                                Background="{ThemeResource CardBackgroundFillColorDefault}"
+                                                BorderBrush="{ThemeResource CardStrokeColorDefault}" BorderThickness="1" Padding="6">
+                                            <StackPanel Spacing="4" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                <TextBlock Text="&#xE8A5;" FontFamily="{ThemeResource SymbolThemeFontFamily}"
+                                                           FontSize="28" HorizontalAlignment="Center" Foreground="{ThemeResource SystemAccentColor}" />
+                                                <TextBlock Text="{x:Bind Name}" FontSize="11" TextTrimming="CharacterEllipsis"
+                                                           TextWrapping="Wrap" MaxLines="2" HorizontalAlignment="Center" TextAlignment="Center" />
+                                                <TextBlock Text="{x:Bind Category}" FontSize="10"
+                                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </GridView.ItemTemplate>
+                            </GridView>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+
+        <Grid Visibility="{x:Bind ViewModel.IsWorking, Mode=OneWay}"
+              Background="#80000000" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <Border Background="{ThemeResource CardBackgroundFillColorDefault}" CornerRadius="14" Padding="28,20"
+                    HorizontalAlignment="Center" VerticalAlignment="Center">
+                <StackPanel Spacing="14" HorizontalAlignment="Center" MinWidth="260">
+                    <ProgressRing IsActive="True" Width="44" Height="44" HorizontalAlignment="Center" />
+                    <ProgressBar Value="{x:Bind ViewModel.ProgressValue, Mode=OneWay}" IsIndeterminate="False" Width="220" />
+                    <TextBlock Text="{x:Bind ViewModel.ProgressPercent, Mode=OneWay}" HorizontalAlignment="Center" FontSize="13"
+                               Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    <Button Command="{x:Bind ViewModel.CancelOperationCommand}"
+                            Content="&#xE10A;" FontFamily="{ThemeResource SymbolThemeFontFamily}"
+                            HorizontalAlignment="Center" Width="36" Height="36"
+                            ToolTipService.ToolTip="Cancel" />
+                </StackPanel>
+            </Border>
+        </Grid>
     </Grid>
 </Page>

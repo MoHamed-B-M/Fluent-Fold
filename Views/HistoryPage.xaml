@@ -4,9 +4,65 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:models="using:FluentFold.Models"
     mc:Ignorable="d">
 
-    <Grid>
-        <TextBlock Text="History" Style="{StaticResource TitleTextBlockStyle}" />
+    <Grid Padding="24">
+        <ScrollViewer>
+            <StackPanel Spacing="20">
+                <TextBlock Text="History" Style="{StaticResource TitleTextBlockStyle}" />
+
+                <Border Style="{StaticResource FluentCardStyle}" Padding="20">
+                    <StackPanel Spacing="12">
+                        <Button Command="{x:Bind ViewModel.RestoreAllCommand}"
+                                Content="&#xE777; Restore All Operations"
+                                FontFamily="Segoe UI, Segoe MDL2 Assets"
+                                IsEnabled="{x:Bind ViewModel.HasHistory, Mode=OneWay}"
+                                HorizontalAlignment="Left" />
+                        <ProgressRing IsActive="{x:Bind ViewModel.IsWorking, Mode=OneWay}"
+                                      Visibility="{x:Bind ViewModel.IsWorking, Mode=OneWay}"
+                                      Width="20" Height="20" />
+
+                        <ListView ItemsSource="{x:Bind ViewModel.Operations, Mode=OneWay}"
+                                  Visibility="{x:Bind ViewModel.HasHistory, Mode=OneWay}">
+                            <ListView.ItemTemplate>
+                                <DataTemplate x:DataType="models:OrganizeOperation">
+                                    <Border Style="{StaticResource FluentCardStyle}" Padding="14" Margin="0,4">
+                                        <Grid ColumnSpacing="12">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                                <TextBlock Text="{x:Bind Timestamp}" FontWeight="SemiBold" />
+                                                <TextBlock Text="{x:Bind SourceFolder}"
+                                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                           TextTrimming="CharacterEllipsis" MaxWidth="300" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right">
+                                                <TextBlock Text="{x:Bind Moves.Count}" FontWeight="Bold" FontSize="18" />
+                                                <TextBlock Text="files" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                                            </StackPanel>
+                                            <Button Grid.Column="2" Click="OnUndoClick" DataContext="{Binding}" VerticalAlignment="Center">
+                                                <StackPanel Orientation="Horizontal" Spacing="4">
+                                                    <TextBlock Text="&#xE7A7;" FontFamily="{ThemeResource SymbolThemeFontFamily}" FontSize="14" />
+                                                    <TextBlock Text="Undo" />
+                                                </StackPanel>
+                                            </Button>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+
+                        <TextBlock x:Name="EmptyStateText" Text="No organization history yet."
+                                   x:Load="{x:Bind ViewModel.HasNoHistory, Mode=OneWay}"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                   HorizontalAlignment="Center" Margin="0,24" />
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
     </Grid>
 </Page>

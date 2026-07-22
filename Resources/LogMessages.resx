@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" id="root">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1"/>
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2"/>
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string"/>
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="OrganizingFiles" xml:space="preserve"><value>Organizing files...</value></data>
+  <data name="OrganizationComplete" xml:space="preserve"><value>Organization complete</value></data>
+  <data name="OperationCancelled" xml:space="preserve"><value>Operation cancelled.</value></data>
+  <data name="UndoingOperation" xml:space="preserve"><value>Reverting last organization...</value></data>
+  <data name="UndoComplete" xml:space="preserve"><value>Undo complete</value></data>
+  <data name="RestoringAll" xml:space="preserve"><value>Restoring all organized folders...</value></data>
+  <data name="RestoreComplete" xml:space="preserve"><value>Restore complete</value></data>
+  <data name="ScanningFiles" xml:space="preserve"><value>Scanning files...</value></data>
+  <data name="ScanComplete" xml:space="preserve"><value>Scan complete</value></data>
+  <data name="SettingsSaved" xml:space="preserve"><value>Settings Saved</value></data>
+  <data name="SettingsSavedMessage" xml:space="preserve"><value>All settings have been saved and applied.</value></data>
+  <data name="NoDuplicatesFound" xml:space="preserve"><value>No duplicates found.</value></data>
+  <data name="FolderSelected" xml:space="preserve"><value>Folder selected</value></data>
+  <data name="RenamingFiles" xml:space="preserve"><value>Renaming files...</value></data>
+  <data name="CleanupSuggestion" xml:space="preserve"><value>Cleanup suggestion</value></data>
+</root>

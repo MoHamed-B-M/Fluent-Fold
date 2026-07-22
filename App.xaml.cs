@@ -1,11 +1,16 @@
-﻿using Microsoft.UI.Xaml;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.UI.Xaml;
 using FluentFold.Services;
+using FluentFold.ViewModels;
+using FluentFold.Views;
 
 namespace FluentFold;
 
 public partial class App : Application
 {
-    private Window? _window;
+    public static MainWindow? MainWindow { get; private set; }
+    public static IServiceProvider Services { get; private set; } = null!;
 
     public App()
     {
@@ -14,13 +19,34 @@ public partial class App : Application
 
     protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
     {
-        RegisterServices();
-        _window = new MainWindow();
-        _window.Activate();
+        var services = new ServiceCollection();
+        ConfigureServices(services);
+        Services = services.BuildServiceProvider();
+
+        MainWindow = new MainWindow(Services);
+        MainWindow.Activate();
     }
 
-    private static void RegisterServices()
+    private static void ConfigureServices(IServiceCollection services)
     {
-        ServiceLocator.Register<IOrganizerService>(new OrganizerService());
+        services.AddLogging(builder =>
+        {
+            builder.SetMinimumLevel(LogLevel.Information);
+        });
+
+        services.AddSingleton<IWindowService, WindowService>();
+        services.AddSingleton<IAppSettingsService, AppSettingsService>();
+        services.AddSingleton<IUndoService, UndoService>();
+        services.AddSingleton<IFirstLaunchService, FirstLaunchService>();
+        services.AddTransient<IFolderPickerService, FolderPickerService>();
+        services.AddTransient<IOrganizerService, OrganizerService>();
+        services.AddTransient<IAnalyzerService, AnalyzerService>();
+        services.AddTransient<IRenamingService, RenamingService>();
+        services.AddTransient<IRulesEngine, RulesEngine>();
+        services.AddTransient<MainViewModel>();
+        services.AddTransient<OrganizerViewModel>();
+        services.AddTransient<AnalyzerViewModel>();
+        services.AddTransient<SettingsViewModel>();
+        services.AddTransient<HistoryViewModel>();
     }
 }
