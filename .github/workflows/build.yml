@@ -17,6 +17,9 @@ jobs:
       matrix:
         platform: [x64, x86, arm64]
     runs-on: windows-latest
+    env:
+      CERT_BASE64: ${{ secrets.CERT_BASE64 }}
+      CERT_PASSWORD: ${{ secrets.CERT_PASSWORD }}
 
     steps:
       - name: Checkout
@@ -44,11 +47,8 @@ jobs:
             --no-restore
 
       - name: Sign MSIX (if certificate secrets configured)
-        if: ${{ secrets.CERT_BASE64 != '' && secrets.CERT_PASSWORD != '' }}
+        if: env.CERT_BASE64 != '' && env.CERT_PASSWORD != ''
         shell: pwsh
-        env:
-          CERT_BASE64: ${{ secrets.CERT_BASE64 }}
-          CERT_PASSWORD: ${{ secrets.CERT_PASSWORD }}
         run: |
           $signtool = "${env:ProgramFiles(x86)}\Windows Kits\10\bin\*\x64\signtool.exe"
           $pfxPath = "$env:RUNNER_TEMP\signing.pfx"
