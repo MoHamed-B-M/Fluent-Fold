@@ -53,7 +53,7 @@ jobs:
           $signtool = "${env:ProgramFiles(x86)}\Windows Kits\10\bin\*\x64\signtool.exe"
           $pfxPath = "$env:RUNNER_TEMP\signing.pfx"
           [IO.File]::WriteAllBytes($pfxPath, [Convert]::FromBase64String($env:CERT_BASE64))
-          Get-ChildItem -Recurse -Filter "*.msix" | ForEach-Object {
+           Get-ChildItem -Recurse -Filter "FluentFold*.msix" | ForEach-Object {
             & $signtool sign /fd SHA256 /a /f $pfxPath /p $env:CERT_PASSWORD $_.FullName
             Write-Host "Signed: $($_.Name)"
           }
