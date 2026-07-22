@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
@@ -57,13 +58,52 @@ public sealed partial class MainWindow : Window
             Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "AppIcon.ico"),
             Path.GetFullPath("Assets/AppIcon.ico"),
         };
-        var path = paths.FirstOrDefault(File.Exists);
-        if (path is null)
+        var icoPath = paths.FirstOrDefault(File.Exists);
+        if (icoPath is null)
         {
             _logger.LogWarning("AppIcon.ico not found");
             return;
         }
-        try { AppWindow.SetIcon(path); } catch (Exception ex) { _logger.LogWarning("SetIcon failed: {Ex}", ex.Message); }
+        try
+        {
+            AppWindow.SetIcon(icoPath);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning("AppWindow.SetIcon failed: {Ex}", ex.Message);
+        }
+        try
+        {
+            var hwnd = WindowNative.GetWindowHandle(this);
+            var hIcon = NativeMethods.LoadImage(
+                IntPtr.Zero, icoPath, NativeMethods.IMAGE_ICON, 0, 0,
+                NativeMethods.LR_LOADFROMFILE | NativeMethods.LR_DEFAULTSIZE);
+            if (hIcon != IntPtr.Zero)
+            {
+                NativeMethods.SendMessage(hwnd, NativeMethods.WM_SETICON, NativeMethods.ICON_BIG, hIcon);
+                NativeMethods.SendMessage(hwnd, NativeMethods.WM_SETICON, NativeMethods.ICON_SMALL, hIcon);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning("Win32 SetIcon failed: {Ex}", ex.Message);
+        }
+    }
+
+    private static class NativeMethods
+    {
+        public const uint WM_SETICON = 0x0080;
+        public const uint ICON_BIG = 1;
+        public const uint ICON_SMALL = 0;
+        public const uint IMAGE_ICON = 1;
+        public const uint LR_LOADFROMFILE = 0x00000010;
+        public const uint LR_DEFAULTSIZE = 0x00000040;
+
+        [DllImport("user32.dll")]
+        public static extern IntPtr SendMessage(IntPtr hWnd, uint msg, uint wParam, IntPtr lParam);
+
+        [DllImport("user32.dll")]
+        public static extern IntPtr LoadImage(IntPtr hInst, string name, uint type, int cx, int cy, uint fuLoad);
     }
 
     public void ShowOnboarding()
