@@ -86,9 +86,10 @@ jobs:
           include-prerelease: true
 
       - name: Restore
-        run: dotnet restore -p:Platform=${{ matrix.platform }}
+        run: dotnet restore -p:Platform=${{ matrix.platform }} -p:RuntimeIdentifier=win-${{ matrix.platform }}
 
       - name: Publish portable for ${{ matrix.platform }}
+        shell: pwsh
         run: |
           dotnet publish -c Release `
             -p:Platform=${{ matrix.platform }} `
@@ -98,17 +99,23 @@ jobs:
             -p:PublishTrimmed=false `
             -p:PublishReadyToRun=false `
             --no-restore
+          Write-Host "=== Publish output locations ==="
+          Get-ChildItem -Recurse -Filter "FluentFold.exe" -Path "bin" | Select-Object FullName
 
       - name: Zip publish output
         shell: pwsh
         run: |
-          $publishDir = "bin\${{ matrix.platform }}\Release\net10.0-windows10.0.26100.0\win-${{ matrix.platform }}\publish"
-          if (Test-Path $publishDir) {
-            Compress-Archive -Path "$publishDir\*" -DestinationPath "FluentFold-${{ matrix.platform }}-portable.zip" -Force
-          } else {
-            Write-Warning "Publish directory not found: $publishDir"
+          $publishDir = Get-ChildItem -Path "bin\${{ matrix.platform }}\Release\net10.0-windows10.0.26100.0\win-${{ matrix.platform }}\publish" -ErrorAction SilentlyContinue
+          if (-not $publishDir) {
+            $publishDir = Get-ChildItem -Recurse -Filter "FluentFold.exe" -Path "bin" | Select-Object -First 1 -ExpandProperty Directory
+          }
+          if (-not $publishDir) {
+            Write-Warning "Publish output not found"
+            Get-ChildItem -Path "bin" -Depth 3 -Directory | Select-Object FullName
             exit 1
           }
+          Write-Host "Zipping: $publishDir"
+          Compress-Archive -Path "$publishDir\*" -DestinationPath "FluentFold-${{ matrix.platform }}-portable.zip" -Force
 
       - name: Upload Portable ZIP
         uses: actions/upload-artifact@v4
