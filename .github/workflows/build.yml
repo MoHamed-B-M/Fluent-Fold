@@ -1,5 +1,7 @@
 name: Build MSIX Packages
 
+# Triggered on push/PR to main; signs with CERT_BASE64/CERT_PASSWORD secrets if configured
+
 on:
   push:
     branches: [ main ]
