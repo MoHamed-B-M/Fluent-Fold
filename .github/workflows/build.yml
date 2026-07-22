@@ -110,14 +110,16 @@ jobs:
           if (-not (Test-Path $iscc)) {
             $iscc = Get-ChildItem -Path "${env:ProgramFiles(x86)}\Inno Setup*" -Filter "iscc.exe" -Recurse | Select-Object -First 1 -ExpandProperty FullName
           }
+          $publishDir = "bin\Release\net10.0-windows10.0.26100.0\win-${{ matrix.platform }}\publish"
           Write-Host "Using: $iscc"
-          & $iscc installer.iss /dPlatform=${{ matrix.platform }}
+          Write-Host "PublishDir: $publishDir"
+          & $iscc installer.iss /dPublishDir="$publishDir"
           Write-Host "=== Installer output ==="
-          Get-ChildItem -Path "bin\${{ matrix.platform }}\Release" -Filter "*-Setup.exe" | Select-Object FullName, Length
+          Get-ChildItem -Path "installer" -Filter "*-Setup.exe" | Select-Object FullName, Length
 
       - name: Upload Installer
         uses: actions/upload-artifact@v4
         with:
           name: FluentFold-${{ matrix.platform }}-Setup
-          path: bin/${{ matrix.platform }}/Release/FluentFold-${{ matrix.platform }}-Setup.exe
+          path: installer/FluentFold-${{ matrix.platform }}-Setup.exe
           if-no-files-found: error

@@ -58,6 +58,7 @@ public sealed partial class MainWindow : Window
     public void ShowOnboarding()
     {
         if (!_firstLaunch.IsFirstLaunch) return;
+        if (!_settings.ShowTeachingTips) return;
         _onboardSlide = 0;
         ShowSlide(0);
         OnboardingOverlayElement.Visibility = Visibility.Visible;

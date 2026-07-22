@@ -1,5 +1,5 @@
 ; Inno Setup script for FluentFold
-; Run with: iscc installer.iss /dPlatform=x64 /dSourceDir=...\publish
+; Run with: iscc installer.iss /dPublishDir=...\publish
 
 #define MyAppName "FluentFold"
 #define MyAppVersion "1.0.0.0"
@@ -18,7 +18,7 @@ AppUpdatesURL={#MyAppURL}
 DefaultDirName={autopf}\{#MyAppName}
 DefaultGroupName={#MyAppName}
 AllowNoIcons=yes
-OutputDir={#SourcePath}bin\{#Platform}\Release
+OutputDir={#SourcePath}installer
 OutputBaseFilename=FluentFold-{#Platform}-Setup
 Compression=lzma
 SolidCompression=yes
@@ -33,7 +33,7 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: checkedonce
 
 [Files]
-Source: "{#SourcePath}bin\{#Platform}\Release\net10.0-windows10.0.26100.0\win-{#Platform}\publish\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "{#PublishDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
 Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
