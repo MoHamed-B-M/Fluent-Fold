@@ -15,16 +15,40 @@ public partial class App : Application
     public App()
     {
         InitializeComponent();
+        UnhandledException += (_, e) =>
+        {
+            var log = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "FluentFold", "crash.log");
+            try
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(log)!);
+                File.AppendAllText(log, $"[{DateTime.Now:O}] Unhandled: {e.Exception}\n");
+            }
+            catch { }
+            e.Handled = true;
+        };
     }
 
     protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
     {
-        var services = new ServiceCollection();
-        ConfigureServices(services);
-        Services = services.BuildServiceProvider();
+        try
+        {
+            var services = new ServiceCollection();
+            ConfigureServices(services);
+            Services = services.BuildServiceProvider();
 
-        MainWindow = new MainWindow(Services);
-        MainWindow.Activate();
+            MainWindow = new MainWindow(Services);
+            MainWindow.Activate();
+        }
+        catch (Exception ex)
+        {
+            var log = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "FluentFold", "crash.log");
+            try
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(log)!);
+                File.AppendAllText(log, $"[{DateTime.Now:O}] Startup failed: {ex}\n");
+            }
+            catch { }
+        }
     }
 
     private static void ConfigureServices(IServiceCollection services)
