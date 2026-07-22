@@ -37,6 +37,8 @@ jobs:
             -p:GenerateAppxPackageOnBuild=true `
             -p:AppxPackageSigningEnabled=false `
             -p:AppxPackage=true `
+            -p:PublishReadyToRun=false `
+            -p:PublishTrimmed=false `
             --no-restore
 
       - name: Sign MSIX (if certificate secrets configured)
