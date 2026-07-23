@@ -66,6 +66,30 @@ jobs:
             else { Write-Host "Signing skipped for $($_.Name) (exit code $LASTEXITCODE)" }
           }
 
+      - name: Patch manifest for Store (replace GUID Name with Hamma.FluentFold)
+        shell: pwsh
+        run: |
+          Get-ChildItem -Recurse -Filter "FluentFold_*.msix" | ForEach-Object {
+            $msix = $_.FullName
+            Write-Host "Patching: $($_.Name)"
+            $tmp = "$env:RUNNER_TEMP\manifest_patch"
+            New-Item -ItemType Directory -Force -Path $tmp | Out-Null
+            $zip = [System.IO.Compression.ZipFile]::Open($msix, 'Update')
+            $entry = $zip.GetEntry('AppxManifest.xml')
+            if (-not $entry) { Write-Host "  AppxManifest.xml not found"; $zip.Dispose(); return }
+            $sr = New-Object System.IO.StreamReader($entry.Open())
+            $xml = $sr.ReadToEnd()
+            $sr.Close()
+            $xml = $xml -replace 'Name="C5A1E627-2AFB-440C-A06A-231E03AB2ED4"', 'Name="Hamma.FluentFold"'
+            $xml = $xml -replace 'Publisher="CN=AppPublisher"', 'Publisher="CN=3232318E-230A-4E9E-BFFD-E1BEFCB40B69"'
+            $xml = $xml -replace '<PublisherDisplayName>AppPublisher</PublisherDisplayName>', '<PublisherDisplayName>Hamma</PublisherDisplayName>'
+            $bytes = [System.Text.Encoding]::UTF8.GetBytes($xml)
+            $sw = New-Object System.IO.StreamWriter($entry.Open())
+            $sw.Write($xml)
+            $sw.Close()
+            $zip.Dispose()
+          }
+
       - name: Flatten MSIX for upload
         shell: pwsh
         run: |
