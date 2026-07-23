@@ -18,9 +18,6 @@ jobs:
       matrix:
         platform: [x64, x86, arm64]
     runs-on: windows-latest
-    env:
-      CERT_BASE64: ${{ secrets.CERT_BASE64 }}
-      CERT_PASSWORD: ${{ secrets.CERT_PASSWORD }}
 
     steps:
       - name: Checkout
@@ -74,23 +71,9 @@ jobs:
           }
 
       - name: Sign MSIX (if certificate secrets configured)
-        if: env.CERT_BASE64 != '' && env.CERT_PASSWORD != ''
+        if: false
         shell: pwsh
-        continue-on-error: true
-        run: |
-          $signtool = Resolve-Path "${env:ProgramFiles(x86)}\Windows Kits\10\bin\*\x64\signtool.exe" | Select-Object -First 1 -ExpandProperty Path
-          if (-not $signtool) { Write-Host "signtool not found"; exit 0 }
-          $pfxPath = "$env:RUNNER_TEMP\signing.pfx"
-          try {
-            [IO.File]::WriteAllBytes($pfxPath, [Convert]::FromBase64String($env:CERT_BASE64))
-          } catch {
-            Write-Host "Failed to write PFX: $_"; exit 0
-          }
-          Get-ChildItem -Recurse -Filter "FluentFold*.msix" | ForEach-Object {
-            & $signtool sign /fd SHA256 /a /f $pfxPath /p $env:CERT_PASSWORD $_.FullName
-            if ($LASTEXITCODE -eq 0) { Write-Host "Signed: $($_.Name)" }
-            else { Write-Host "Signing skipped for $($_.Name) (exit code $LASTEXITCODE)" }
-          }
+        run: Write-Host "Signing disabled — Store re-signs packages during submission"
 
       - name: Flatten MSIX for upload
         shell: pwsh
