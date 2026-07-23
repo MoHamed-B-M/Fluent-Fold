@@ -58,12 +58,18 @@ jobs:
             Write-Host "Signed: $($_.Name)"
           }
 
+      - name: Flatten MSIX for upload
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path "_output" | Out-Null
+          Get-ChildItem -Recurse -Filter "FluentFold_*.msix" | Copy-Item -Destination "_output" -Force
+          Get-ChildItem "_output"
+
       - name: Upload MSIX Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: FluentFold-${{ matrix.platform }}
-          path: |
-            **/AppPackages/**/FluentFold_*.msix
+          path: _output/*
           if-no-files-found: warn
 
   installer:
