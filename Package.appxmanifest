@@ -8,11 +8,11 @@
   IgnorableNamespaces="uap rescap">
 
   <Identity
-    Name="Hamma.FluentFold"
+    Name="C5A1E627-2AFB-440C-A06A-231E03AB2ED4"
     Publisher="CN=3232318E-230A-4E9E-BFFD-E1BEFCB40B69"
     Version="1.0.0.0" />
 
-  <mp:PhoneIdentity PhoneProductId="Hamma.FluentFold" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
+  <mp:PhoneIdentity PhoneProductId="C5A1E627-2AFB-440C-A06A-231E03AB2ED4" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
     <DisplayName>FluentFold</DisplayName>
