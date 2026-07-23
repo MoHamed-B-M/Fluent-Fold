@@ -9,8 +9,6 @@ using Microsoft.UI.Windowing;
 using FluentFold.Services;
 using FluentFold.ViewModels;
 using WinRT.Interop;
-using Windows.UI.StartScreen;
-using Windows.ApplicationModel;
 
 namespace FluentFold;
 
@@ -121,30 +119,12 @@ public sealed partial class MainWindow : Window
     private void DismissOnboarding()
     {
         if (OnboardingOverlayElement.Visibility != Visibility.Visible) return;
-        if (PinToStartToggle.IsOn) _ = TryPinToStartAsync();
-        if (PinToTaskbarToggle.IsOn) _ = TryPinToTaskbarAsync();
+        if (PinToTaskbarToggle.IsOn) TryPinToTaskbar();
         _firstLaunch.MarkCompleted();
         OnboardingOverlayElement.Visibility = Visibility.Collapsed;
     }
 
-    private async Task TryPinToStartAsync()
-    {
-        try
-        {
-            var mgr = StartScreenManager.GetDefault();
-            var entries = await Package.Current.GetAppListEntriesAsync();
-            var entry = entries.FirstOrDefault();
-            if (entry is not null && mgr.SupportsAppListEntry(entry))
-                await mgr.TryAddAppListEntryAsync(entry);
-            _logger.LogInformation("Pinned to Start");
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning("Pin to Start failed: {Ex}", ex.Message);
-        }
-    }
-
-    private async Task TryPinToTaskbarAsync()
+    private void TryPinToTaskbar()
     {
         try
         {
@@ -162,7 +142,6 @@ public sealed partial class MainWindow : Window
             ps.StartInfo.UseShellExecute = false;
             ps.StartInfo.CreateNoWindow = true;
             ps.Start();
-            await ps.WaitForExitAsync();
         }
         catch (Exception ex)
         {
