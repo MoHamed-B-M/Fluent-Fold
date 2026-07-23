@@ -9,6 +9,8 @@ using Microsoft.UI.Windowing;
 using FluentFold.Services;
 using FluentFold.ViewModels;
 using WinRT.Interop;
+using Windows.UI.StartScreen;
+using Windows.ApplicationModel;
 
 namespace FluentFold;
 
@@ -119,8 +121,53 @@ public sealed partial class MainWindow : Window
     private void DismissOnboarding()
     {
         if (OnboardingOverlayElement.Visibility != Visibility.Visible) return;
+        if (PinToStartToggle.IsOn) _ = TryPinToStartAsync();
+        if (PinToTaskbarToggle.IsOn) _ = TryPinToTaskbarAsync();
         _firstLaunch.MarkCompleted();
         OnboardingOverlayElement.Visibility = Visibility.Collapsed;
+    }
+
+    private async Task TryPinToStartAsync()
+    {
+        try
+        {
+            var mgr = StartScreenManager.GetDefault();
+            var entries = await Package.Current.GetAppListEntriesAsync();
+            var entry = entries.FirstOrDefault();
+            if (entry is not null && mgr.SupportsAppListEntry(entry))
+                await mgr.TryAddAppListEntryAsync(entry);
+            _logger.LogInformation("Pinned to Start");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning("Pin to Start failed: {Ex}", ex.Message);
+        }
+    }
+
+    private async Task TryPinToTaskbarAsync()
+    {
+        try
+        {
+            var desktop = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            var shortcut = Directory.GetFiles(desktop, "FluentFold.lnk").FirstOrDefault()
+                        ?? Directory.GetFiles(desktop, "FluentFold*").FirstOrDefault();
+            if (shortcut is null)
+            {
+                _logger.LogWarning("No desktop shortcut found for pinning");
+                return;
+            }
+            using var ps = new System.Diagnostics.Process();
+            ps.StartInfo.FileName = "powershell.exe";
+            ps.StartInfo.Arguments = $"-Command \"$s = New-Object -ComObject Shell.Application; $f = $s.NameSpace(0).ParseName('{shortcut.Replace("'", "''")}'); if ($f) {{ $f.InvokeVerb('taskbarpin') }}\"";
+            ps.StartInfo.UseShellExecute = false;
+            ps.StartInfo.CreateNoWindow = true;
+            ps.Start();
+            await ps.WaitForExitAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning("Pin to taskbar failed: {Ex}", ex.Message);
+        }
     }
 
     private void OnCloseClick(object sender, RoutedEventArgs e)

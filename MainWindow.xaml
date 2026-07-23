@@ -300,6 +300,10 @@
                                     <TextBlock Text="&#xE772;  Visit Settings to customize your experience" FontSize="13" />
                                 </StackPanel>
                             </Border>
+                            <StackPanel Spacing="4" HorizontalAlignment="Center" MaxWidth="400">
+                                <ToggleSwitch x:Name="PinToStartToggle" Header="Pin to Start menu" IsOn="True" />
+                                <ToggleSwitch x:Name="PinToTaskbarToggle" Header="Pin to taskbar" IsOn="True" />
+                            </StackPanel>
                         </StackPanel>
                     </Grid>
 
