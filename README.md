@@ -14,9 +14,7 @@
 
 ## Screenshots
 
-| Organizer Page | Analyzer Page | Settings Page |
-|:---:|:---:|:---:|
-| ![Organizer](Assets/screenshots/1.png) | ![Analyzer](Assets/screenshots/2.png) | ![Settings](Assets/screenshots/3.png) |
+| ![](Assets/screenshots/1.png) | ![](Assets/screenshots/2.png) | ![](Assets/screenshots/3.png) |
 
 ---
 
@@ -63,6 +61,10 @@ Get the latest build from the [Releases page](https://github.com/MoHamed-B-M/Flu
 | **MSIX (x64)** | `.msix` | Side-loadable app package for x64 devices |
 | **MSIX (x86)** | `.msix` | Side-loadable app package for x86 devices |
 | **MSIX (ARM64)** | `.msix` | Side-loadable app package for ARM64 devices |
+
+### Microsoft Store
+
+[![Microsoft Store](https://get.microsoft.com/images/en-us%20dark.svg)](https://aka.ms/fluentfold-store)
 
 ---
 

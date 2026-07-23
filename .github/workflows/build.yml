@@ -62,7 +62,7 @@ jobs:
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force -Path "_output" | Out-Null
-          Get-ChildItem -Recurse -Filter "FluentFold_*.msix" | Copy-Item -Destination "_output" -Force
+          Get-ChildItem -Recurse -Path "AppPackages" -Filter "FluentFold_*.msix" | Copy-Item -Destination "_output" -Force
           Get-ChildItem "_output"
 
       - name: Upload MSIX Artifacts
