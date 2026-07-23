@@ -39,7 +39,7 @@ Name: "{group}\{cm:UninstallProgram,{#MyAppName}}"; Filename: "{uninstallexe}"
 Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; WorkingDir: "{app}"; IconFilename: "{app}\{#MyAppExeName}"; AppUserModelID: "FluentFold"
 
 [Run]
-Filename: "{app}\{#MyAppExeName}"; WorkingDir: "{app}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\{#MyAppExeName}"; WorkingDir: "{app}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent runascurrentuser
 
 [Code]
 const
@@ -54,21 +54,28 @@ begin
          or RegValueExists(HKLM, 'SOFTWARE\WOW6432Node\Microsoft\VisualStudio\14.0\VC\Runtimes\{#Platform}', 'Bld');
 end;
 
-procedure DownloadAndRun(const Url, FileName: string);
+procedure InstallVC(const Url, FileName: string);
 var
   TmpFile, Cmd: string;
   Code: Integer;
 begin
   TmpFile := ExpandConstant('{tmp}\' + FileName);
   Cmd := '-Command "& {param($u,$f) [Net.ServicePointManager]::SecurityProtocol = 3072; try { Invoke-WebRequest -Uri $u -OutFile $f; exit 0 } catch { exit 1 }}" -u "' + Url + '" -f "' + TmpFile + '"';
-  Log('Downloading: ' + Url);
-  if Exec('powershell.exe', Cmd, '', SW_HIDE, ewWaitUntilTerminated, Code) and (Code = 0) then
+  Log('Downloading VC++ redist from: ' + Url);
+  if not (Exec('powershell.exe', Cmd, '', SW_HIDE, ewWaitUntilTerminated, Code) and (Code = 0)) then
   begin
-    Log('Installing VC++ redist...');
-    Exec(TmpFile, '/install /quiet /norestart', '', SW_SHOW, ewNoWait, Code);
+    Log('Download failed with code: ' + IntToStr(Code));
+    Exit;
+  end;
+  Log('Installing VC++ redist (waiting for completion)...');
+  if Exec(TmpFile, '/install /quiet /norestart', '', SW_HIDE, ewWaitUntilTerminated, Code) then
+  begin
+    Log('VC++ install exit code: ' + IntToStr(Code));
+    if Code = 3010 then
+      Log('VC++ redist requires restart');
   end
   else
-    Log('Download failed with code: ' + IntToStr(Code));
+    Log('Failed to start VC++ redist installer');
 end;
 
 function PrepareToInstall(var NeedsRestart: Boolean): String;
@@ -83,7 +90,11 @@ begin
   end;
   if Url = '' then Exit;
   if SuppressibleMsgBox('This app requires the Microsoft Visual C++ Redistributable.'#13#10#13#10'Download and install it now?', mbConfirmation, MB_YESNO, IDYES) = IDYES then
-    DownloadAndRun(Url, 'vc_redist_{#Platform}.exe')
+  begin
+    InstallVC(Url, 'vc_redist_{#Platform}.exe');
+    if not IsVCInstalled then
+      NeedsRestart := True;
+  end
   else
     Result := 'Missing Microsoft Visual C++ Redistributable. Install manually from: ' + Url;
 end;
