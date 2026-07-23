@@ -63,10 +63,7 @@ jobs:
         with:
           name: FluentFold-${{ matrix.platform }}
           path: |
-            bin/${{ matrix.platform }}/Release/**/*.msix
-            bin/${{ matrix.platform }}/Release/**/*.msixupload
-            **/AppPackages/**/*.msix
-            **/AppPackages/**/*.msixupload
+            **/AppPackages/**/FluentFold_*.msix
           if-no-files-found: warn
 
   installer:
