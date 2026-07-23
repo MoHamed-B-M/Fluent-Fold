@@ -27,4 +27,9 @@ public sealed partial class AboutPage : Page
     {
         await Launcher.LaunchUriAsync(new Uri("https://github.com/MoHamed-B-M/Fluent-Fold"));
     }
+
+    private async void OnFeedbackClick(object sender, RoutedEventArgs e)
+    {
+        await Launcher.LaunchUriAsync(new Uri("https://github.com/MoHamed-B-M/Fluent-Fold/issues"));
+    }
 }
