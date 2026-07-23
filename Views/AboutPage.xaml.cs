@@ -1,3 +1,4 @@
+using System.Reflection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Windows.ApplicationModel;
@@ -10,11 +11,20 @@ public sealed partial class AboutPage : Page
     public AboutPage()
     {
         InitializeComponent();
-        VersionText.Text = $"Version {Package.Current.Id.Version.Major}.{Package.Current.Id.Version.Minor}.{Package.Current.Id.Version.Build}";
+        try
+        {
+            var ver = Package.Current.Id.Version;
+            VersionText.Text = $"Version {ver.Major}.{ver.Minor}.{ver.Build}";
+        }
+        catch
+        {
+            var ver = Assembly.GetExecutingAssembly().GetName().Version;
+            VersionText.Text = $"Version {ver?.Major ?? 1}.{ver?.Minor ?? 0}.{ver?.Build ?? 0}";
+        }
     }
 
     private async void OnGitHubClick(object sender, RoutedEventArgs e)
     {
-        await Launcher.LaunchUriAsync(new Uri("https://github.com/fluentfold"));
+        await Launcher.LaunchUriAsync(new Uri("https://github.com/MoHamed-B-M/Fluent-Fold"));
     }
 }
