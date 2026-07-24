@@ -1,35 +1,20 @@
 using Microsoft.Extensions.Logging;
-using Windows.Storage;
 
 namespace FluentFold.Services;
 
-public sealed class FirstLaunchService(ILogger<FirstLaunchService> logger) : IFirstLaunchService
+public sealed class FirstLaunchService(IAppSettingsService settings, ILogger<FirstLaunchService> logger) : IFirstLaunchService
 {
-    private readonly ApplicationDataContainer _settings = ApplicationData.Current.LocalSettings;
-
-    public bool IsFirstLaunch
-    {
-        get
-        {
-            var val = _settings.Values["HasCompletedOnboarding"];
-            return val switch
-            {
-                bool b => !b,
-                string s => !bool.TryParse(s, out var b) || !b,
-                _ => true
-            };
-        }
-    }
+    public bool IsFirstLaunch => !settings.HasCompletedFirstLaunch;
 
     public void MarkCompleted()
     {
-        _settings.Values["HasCompletedOnboarding"] = true;
+        settings.HasCompletedFirstLaunch = true;
         logger.LogInformation("First-launch onboarding marked completed");
     }
 
     public void Reset()
     {
-        _settings.Values.Remove("HasCompletedOnboarding");
+        settings.HasCompletedFirstLaunch = false;
         logger.LogInformation("First-launch onboarding reset");
     }
 }

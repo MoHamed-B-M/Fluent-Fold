@@ -15,7 +15,7 @@ public sealed partial class OrganizerPage : Page
 {
     public OrganizerViewModel ViewModel { get; set; } = null!;
 
-    private readonly Compositor _compositor;
+    private Compositor? _compositor;
     private SpringVector3NaturalMotionAnimation? _springAnimation;
 
     public OrganizerPage()
@@ -30,8 +30,21 @@ public sealed partial class OrganizerPage : Page
             throw;
         }
         InitializeComponent();
-        _compositor = CompositionTarget.GetCompositorForCurrentThread();
-        Loaded += (_, _) => ViewModel.RefreshMode();
+        Loaded += OnLoaded;
+    }
+
+    private void OnLoaded(object sender, RoutedEventArgs e)
+    {
+        Loaded -= OnLoaded;
+        try
+        {
+            _compositor = CompositionTarget.GetCompositorForCurrentThread();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[OrganizerPage] Compositor init failed: {ex}");
+        }
+        ViewModel.RefreshMode();
     }
 
     private void OnRemoveRuleClick(object sender, RoutedEventArgs e)
@@ -86,12 +99,9 @@ public sealed partial class OrganizerPage : Page
 
     private void CreateOrUpdateSpringAnimation(float finalValue)
     {
-        if (_springAnimation == null)
-        {
-            _springAnimation = _compositor.CreateSpringVector3Animation();
-            _springAnimation.Target = "Scale";
-        }
-
+        if (_compositor is null) return;
+        _springAnimation ??= _compositor.CreateSpringVector3Animation();
+        _springAnimation.Target = "Scale";
         _springAnimation.FinalValue = new Vector3(finalValue);
     }
 }

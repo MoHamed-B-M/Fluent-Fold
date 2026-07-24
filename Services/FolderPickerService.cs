@@ -31,16 +31,16 @@ public sealed class FolderPickerService(IWindowService windowService, ILogger<Fo
 
     public async Task<StorageFolder?> GetPersistedFolderAsync()
     {
-        if (!StorageApplicationPermissions.FutureAccessList.ContainsItem("PickedFolderToken"))
-            return null;
-
         try
         {
+            if (!StorageApplicationPermissions.FutureAccessList.ContainsItem("PickedFolderToken"))
+                return null;
+
             return await StorageApplicationPermissions.FutureAccessList.GetFolderAsync("PickedFolderToken");
         }
         catch (Exception ex)
         {
-            logger.LogWarning(ex, "Failed to retrieve persisted folder");
+            logger.LogWarning(ex, "Failed to retrieve persisted folder (unpackaged mode may not support FutureAccessList)");
             return null;
         }
     }

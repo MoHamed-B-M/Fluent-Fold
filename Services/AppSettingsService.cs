@@ -1,125 +1,251 @@
+using System.Text.Json;
 using Microsoft.Extensions.Logging;
-using Windows.Storage;
 
 namespace FluentFold.Services;
 
-public sealed class AppSettingsService(ILogger<AppSettingsService> logger) : IAppSettingsService
+public sealed class AppSettingsService : IAppSettingsService, IDisposable
 {
-    private readonly ApplicationDataContainer _settings = ApplicationData.Current.LocalSettings;
+    private readonly string _filePath;
+    private readonly ILogger<AppSettingsService> _logger;
+    private readonly SemaphoreSlim _lock = new(1, 1);
+    private Dictionary<string, string?> _values;
+    private bool _loaded;
+    private readonly FileSystemWatcher? _watcher;
+    private bool _disposed;
+
+    public AppSettingsService(ILogger<AppSettingsService> logger)
+    {
+        _logger = logger;
+        var dir = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "FluentFold");
+        Directory.CreateDirectory(dir);
+        _filePath = Path.Combine(dir, "settings.json");
+        _values = [];
+
+        try
+        {
+            _watcher = new FileSystemWatcher(dir, "settings.json")
+            {
+                NotifyFilter = NotifyFilters.LastWrite,
+                EnableRaisingEvents = true
+            };
+            _watcher.Changed += OnSettingsFileChanged;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to create settings file watcher");
+        }
+    }
+
+    private void OnSettingsFileChanged(object sender, FileSystemEventArgs e)
+    {
+        if (_disposed) return;
+        try
+        {
+            _lock.Wait();
+            _loaded = false;
+        }
+        finally { _lock.Release(); }
+    }
+
+    private async Task EnsureLoadedAsync()
+    {
+        if (_loaded) return;
+        await _lock.WaitAsync();
+        try
+        {
+            if (_loaded) return;
+            if (File.Exists(_filePath))
+            {
+                var json = await File.ReadAllTextAsync(_filePath);
+                _values = JsonSerializer.Deserialize<Dictionary<string, string?>>(json) ?? [];
+            }
+            _loaded = true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to load settings, using defaults");
+            _values = [];
+            _loaded = true;
+        }
+        finally { _lock.Release(); }
+    }
+
+    private void EnsureLoaded()
+    {
+        if (_loaded) return;
+        _lock.Wait();
+        try
+        {
+            if (_loaded) return;
+            if (File.Exists(_filePath))
+            {
+                var json = File.ReadAllText(_filePath);
+                _values = JsonSerializer.Deserialize<Dictionary<string, string?>>(json) ?? [];
+            }
+            _loaded = true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to load settings, using defaults");
+            _values = [];
+            _loaded = true;
+        }
+        finally { _lock.Release(); }
+    }
+
+    private async Task SaveAsync()
+    {
+        await _lock.WaitAsync();
+        try
+        {
+            var json = JsonSerializer.Serialize(_values, new JsonSerializerOptions { WriteIndented = true });
+            await File.WriteAllTextAsync(_filePath, json);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to save settings");
+        }
+        finally { _lock.Release(); }
+    }
+
+    private void Save()
+    {
+        _lock.Wait();
+        try
+        {
+            var json = JsonSerializer.Serialize(_values, new JsonSerializerOptions { WriteIndented = true });
+            File.WriteAllText(_filePath, json);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to save settings");
+        }
+        finally { _lock.Release(); }
+    }
+
+    private T Get<T>(string key, T defaultValue)
+    {
+        EnsureLoaded();
+        _lock.Wait();
+        try
+        {
+            if (_values.TryGetValue(key, out var raw) && raw is not null)
+            {
+                if (typeof(T) == typeof(string))
+                    return (T)(object)raw;
+                if (typeof(T) == typeof(bool) && bool.TryParse(raw, out var b))
+                    return (T)(object)b;
+                if (typeof(T) == typeof(double) && double.TryParse(raw, out var d))
+                    return (T)(object)d;
+            }
+            return defaultValue;
+        }
+        finally { _lock.Release(); }
+    }
+
+    private void Set<T>(string key, T value)
+    {
+        EnsureLoaded();
+        _lock.Wait();
+        try
+        {
+            _values[key] = value?.ToString();
+        }
+        finally { _lock.Release(); }
+        Save();
+    }
 
     public bool EnableNotifications
     {
-        get => GetBool(nameof(EnableNotifications), true);
-        set => SetBool(nameof(EnableNotifications), value);
+        get => Get(nameof(EnableNotifications), true);
+        set => Set(nameof(EnableNotifications), value);
     }
 
     public string DefaultOrganizationMode
     {
-        get => GetString(nameof(DefaultOrganizationMode), "Move");
-        set => SetString(nameof(DefaultOrganizationMode), value);
+        get => Get(nameof(DefaultOrganizationMode), "Move");
+        set => Set(nameof(DefaultOrganizationMode), value);
     }
 
     public bool KeepFolderStructure
     {
-        get => GetBool(nameof(KeepFolderStructure), false);
-        set => SetBool(nameof(KeepFolderStructure), value);
+        get => Get(nameof(KeepFolderStructure), false);
+        set => Set(nameof(KeepFolderStructure), value);
     }
 
     public string ThemePreference
     {
-        get => GetString(nameof(ThemePreference), "System");
-        set => SetString(nameof(ThemePreference), value);
+        get => Get(nameof(ThemePreference), "System");
+        set => Set(nameof(ThemePreference), value);
     }
 
     public bool ShowTeachingTips
     {
-        get => GetBool(nameof(ShowTeachingTips), true);
-        set => SetBool(nameof(ShowTeachingTips), value);
+        get => Get(nameof(ShowTeachingTips), true);
+        set => Set(nameof(ShowTeachingTips), value);
     }
 
     public bool HasShownFirstLaunchTip
     {
-        get => GetBool(nameof(HasShownFirstLaunchTip), false);
-        set => SetBool(nameof(HasShownFirstLaunchTip), value);
+        get => Get(nameof(HasShownFirstLaunchTip), false);
+        set => Set(nameof(HasShownFirstLaunchTip), value);
     }
 
     public string AppMode
     {
-        get => GetString(nameof(AppMode), "Pro");
-        set => SetString(nameof(AppMode), value);
+        get => Get(nameof(AppMode), "Pro");
+        set => Set(nameof(AppMode), value);
     }
 
     public bool HasCompletedFirstLaunch
     {
-        get => GetBool(nameof(HasCompletedFirstLaunch), false);
-        set => SetBool(nameof(HasCompletedFirstLaunch), value);
+        get => Get(nameof(HasCompletedFirstLaunch), false);
+        set => Set(nameof(HasCompletedFirstLaunch), value);
     }
 
     public double WindowWidth
     {
-        get => GetDouble(nameof(WindowWidth), 1200);
-        set => SetDouble(nameof(WindowWidth), value);
+        get => Get(nameof(WindowWidth), 1200.0);
+        set => Set(nameof(WindowWidth), value);
     }
 
     public double WindowHeight
     {
-        get => GetDouble(nameof(WindowHeight), 800);
-        set => SetDouble(nameof(WindowHeight), value);
+        get => Get(nameof(WindowHeight), 800.0);
+        set => Set(nameof(WindowHeight), value);
     }
 
     public double WindowX
     {
-        get => GetDouble(nameof(WindowX), -1);
-        set => SetDouble(nameof(WindowX), value);
+        get => Get(nameof(WindowX), -1.0);
+        set => Set(nameof(WindowX), value);
     }
 
     public double WindowY
     {
-        get => GetDouble(nameof(WindowY), -1);
-        set => SetDouble(nameof(WindowY), value);
+        get => Get(nameof(WindowY), -1.0);
+        set => Set(nameof(WindowY), value);
     }
 
     public bool UseRecycleBin
     {
-        get => GetBool(nameof(UseRecycleBin), true);
-        set => SetBool(nameof(UseRecycleBin), value);
+        get => Get(nameof(UseRecycleBin), true);
+        set => Set(nameof(UseRecycleBin), value);
     }
 
     public string SortMode
     {
-        get => GetString(nameof(SortMode), "Type");
-        set => SetString(nameof(SortMode), value);
+        get => Get(nameof(SortMode), "Type");
+        set => Set(nameof(SortMode), value);
     }
 
-    private bool GetBool(string key, bool defaultValue)
+    public void Dispose()
     {
-        var val = _settings.Values[key] as string;
-        return val is not null && bool.TryParse(val, out var result) ? result : defaultValue;
-    }
-
-    private void SetBool(string key, bool value)
-    {
-        _settings.Values[key] = value.ToString();
-        logger.LogDebug("Setting '{Key}' = {Value}", key, value);
-    }
-
-    private string GetString(string key, string defaultValue) => _settings.Values[key] as string ?? defaultValue;
-
-    private void SetString(string key, string value)
-    {
-        _settings.Values[key] = value;
-        logger.LogDebug("Setting '{Key}' = {Value}", key, value);
-    }
-
-    private double GetDouble(string key, double defaultValue)
-    {
-        var val = _settings.Values[key] as string;
-        return val is not null && double.TryParse(val, out var result) ? result : defaultValue;
-    }
-
-    private void SetDouble(string key, double value)
-    {
-        _settings.Values[key] = value.ToString("F0");
-        logger.LogDebug("Setting '{Key}' = {Value}", key, value);
+        if (_disposed) return;
+        _disposed = true;
+        _watcher?.Dispose();
+        _lock.Dispose();
     }
 }

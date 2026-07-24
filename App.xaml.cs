@@ -56,6 +56,7 @@ public partial class App : Application
         services.AddLogging(builder =>
         {
             builder.SetMinimumLevel(LogLevel.Information);
+            builder.AddDebug();
         });
 
         services.AddSingleton<IWindowService, WindowService>();
