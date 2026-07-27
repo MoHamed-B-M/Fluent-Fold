@@ -46,12 +46,15 @@
                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
                             </StackPanel>
                             <Button Command="{x:Bind ViewModel.PickFolderCommand}" HorizontalAlignment="Center"
-                                    Width="48" Height="48" CornerRadius="24" FontSize="18"
-                                    Background="{ThemeResource SystemAccentColor}" Foreground="White" BorderThickness="0"
                                     PointerEntered="Button_PointerEntered" PointerExited="Button_PointerExited"
                                     PointerPressed="Button_PointerPressed" PointerReleased="Button_PointerReleased"
-                                    ToolTipService.ToolTip="Select a folder">
-                                <TextBlock Text="&#xE838;" FontFamily="{ThemeResource SymbolThemeFontFamily}" />
+                                    ToolTipService.ToolTip="Select a folder"
+                                    Background="{ThemeResource SystemAccentColor}" Foreground="White"
+                                    BorderThickness="0" CornerRadius="12" Padding="20,12">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <FontIcon Glyph="&#xE838;" FontSize="18" />
+                                    <TextBlock Text="Select Folder" VerticalAlignment="Center" FontSize="14" />
+                                </StackPanel>
                             </Button>
                             <TextBlock Text="{x:Bind ViewModel.SelectedFolderPath, Mode=OneWay}"
                                        Visibility="{x:Bind ViewModel.FolderSelectedVisibility, Mode=OneWay}"
@@ -61,27 +64,46 @@
                                         HorizontalAlignment="Stretch">
                                 <Button x:Name="HeroOrganizeButton"
                                         Command="{x:Bind ViewModel.OrganizeCommand}"
-                                        Content="&#xE768;" FontFamily="{ThemeResource SymbolThemeFontFamily}" FontSize="24"
-                                        Style="{StaticResource HeroStartButtonStyle}"
                                         IsEnabled="{x:Bind ViewModel.CanOrganize, Mode=OneWay}"
                                         PointerEntered="Button_PointerEntered" PointerExited="Button_PointerExited"
                                         PointerPressed="Button_PointerPressed" PointerReleased="Button_PointerReleased"
-                                        ToolTipService.ToolTip="Start Organizing" />
+                                        ToolTipService.ToolTip="Start Organizing"
+                                        Background="{ThemeResource SystemAccentColor}" Foreground="White"
+                                        BorderThickness="0" CornerRadius="12" Padding="24,14"
+                                        HorizontalAlignment="Center">
+                                    <StackPanel Orientation="Horizontal" Spacing="10">
+                                        <FontIcon Glyph="&#xE768;" FontSize="22" />
+                                        <StackPanel VerticalAlignment="Center">
+                                            <TextBlock Text="Organize Files" FontSize="16" FontWeight="SemiBold" />
+                                            <TextBlock Text="{x:Bind ViewModel.SelectedFolderPath, Mode=OneWay}"
+                                                       FontSize="11" Foreground="White" Opacity="0.7" TextTrimming="CharacterEllipsis"
+                                                       MaxWidth="300" />
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Button>
                             </StackPanel>
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="8"
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="10"
                                         Visibility="{x:Bind ViewModel.FolderSelectedVisibility, Mode=OneWay}">
-                                <Button Command="{x:Bind ViewModel.UndoCommand}" Content="&#xE7A7;"
-                                        FontFamily="{ThemeResource SymbolThemeFontFamily}" FontSize="16"
+                                <Button Command="{x:Bind ViewModel.UndoCommand}"
                                         IsEnabled="{x:Bind ViewModel.CanUndo, Mode=OneWay}"
                                         PointerEntered="Button_PointerEntered" PointerExited="Button_PointerExited"
                                         PointerPressed="Button_PointerPressed" PointerReleased="Button_PointerReleased"
-                                        ToolTipService.ToolTip="Undo" />
-                                <Button Command="{x:Bind ViewModel.RestoreAllCommand}" Content="&#xE777;"
-                                        FontFamily="{ThemeResource SymbolThemeFontFamily}" FontSize="16"
+                                        ToolTipService.ToolTip="Undo" CornerRadius="8" Padding="14,8">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <FontIcon Glyph="&#xE7A7;" FontSize="14" />
+                                        <TextBlock Text="Undo" FontSize="13" />
+                                    </StackPanel>
+                                </Button>
+                                <Button Command="{x:Bind ViewModel.RestoreAllCommand}"
                                         IsEnabled="{x:Bind ViewModel.CanUndo, Mode=OneWay}"
                                         PointerEntered="Button_PointerEntered" PointerExited="Button_PointerExited"
                                         PointerPressed="Button_PointerPressed" PointerReleased="Button_PointerReleased"
-                                        ToolTipService.ToolTip="Restore All" />
+                                        ToolTipService.ToolTip="Restore All" CornerRadius="8" Padding="14,8">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <FontIcon Glyph="&#xE777;" FontSize="14" />
+                                        <TextBlock Text="Restore" FontSize="13" />
+                                    </StackPanel>
+                                </Button>
                                 <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center"
                                             Visibility="{x:Bind ViewModel.WorkingVisibility, Mode=OneWay}">
                                     <ProgressBar Value="{x:Bind ViewModel.ProgressValue, Mode=OneWay}"
@@ -176,39 +198,57 @@
                     </Grid>
 
                     <Border Style="{StaticResource FluentCardStyle}" Padding="20">
-                        <StackPanel Spacing="12">
+                        <StackPanel Spacing="16">
                             <StackPanel Orientation="Horizontal" Spacing="12">
-                                <Button Command="{x:Bind ViewModel.PickFolderCommand}" Width="36" Height="36"
+                                <Button Command="{x:Bind ViewModel.PickFolderCommand}" Width="44" Height="44"
                                         PointerEntered="Button_PointerEntered" PointerExited="Button_PointerExited"
                                         PointerPressed="Button_PointerPressed" PointerReleased="Button_PointerReleased"
-                                        ToolTipService.ToolTip="Select Folder">
-                                    <TextBlock Text="&#xE838;" FontFamily="{ThemeResource SymbolThemeFontFamily}" FontSize="14" />
+                                        ToolTipService.ToolTip="Select Folder"
+                                        Background="{ThemeResource SystemAccentColor}" Foreground="White"
+                                        BorderThickness="0" CornerRadius="10">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <FontIcon Glyph="&#xE838;" FontSize="16" />
+                                        <TextBlock Text="Select Folder" VerticalAlignment="Center" FontSize="13" />
+                                    </StackPanel>
                                 </Button>
                                 <TextBlock Text="{x:Bind ViewModel.SelectedFolderPath, Mode=OneWay}"
                                            VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                            TextTrimming="CharacterEllipsis" />
                             </StackPanel>
-                            <StackPanel Orientation="Horizontal" Spacing="8">
+                            <StackPanel Orientation="Horizontal" Spacing="10">
                                 <Button x:Name="OrganizeButton" Command="{x:Bind ViewModel.OrganizeCommand}"
-                                        IsEnabled="{x:Bind ViewModel.CanOrganize, Mode=OneWay}" Width="36" Height="36"
+                                        IsEnabled="{x:Bind ViewModel.CanOrganize, Mode=OneWay}" Width="44" Height="44"
                                         PointerEntered="Button_PointerEntered" PointerExited="Button_PointerExited"
                                         PointerPressed="Button_PointerPressed" PointerReleased="Button_PointerReleased"
-                                        ToolTipService.ToolTip="Organize Files">
-                                    <TextBlock Text="&#xE768;" FontFamily="{ThemeResource SymbolThemeFontFamily}" FontSize="14" />
+                                        ToolTipService.ToolTip="Organize Files"
+                                        Background="{ThemeResource SystemAccentColor}" Foreground="White"
+                                        BorderThickness="0" CornerRadius="10">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <FontIcon Glyph="&#xE768;" FontSize="16" />
+                                        <TextBlock Text="Organize" VerticalAlignment="Center" FontSize="13" />
+                                    </StackPanel>
                                 </Button>
                                 <Button Command="{x:Bind ViewModel.UndoCommand}"
-                                        IsEnabled="{x:Bind ViewModel.CanUndo, Mode=OneWay}" Width="36" Height="36"
+                                        IsEnabled="{x:Bind ViewModel.CanUndo, Mode=OneWay}" Width="44" Height="44"
                                         PointerEntered="Button_PointerEntered" PointerExited="Button_PointerExited"
                                         PointerPressed="Button_PointerPressed" PointerReleased="Button_PointerReleased"
-                                        ToolTipService.ToolTip="Undo">
-                                    <TextBlock Text="&#xE7A7;" FontFamily="{ThemeResource SymbolThemeFontFamily}" FontSize="14" />
+                                        ToolTipService.ToolTip="Undo"
+                                        CornerRadius="10">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <FontIcon Glyph="&#xE7A7;" FontSize="16" />
+                                        <TextBlock Text="Undo" VerticalAlignment="Center" FontSize="13" />
+                                    </StackPanel>
                                 </Button>
                                 <Button Command="{x:Bind ViewModel.RestoreAllCommand}"
-                                        IsEnabled="{x:Bind ViewModel.CanUndo, Mode=OneWay}" Width="36" Height="36"
+                                        IsEnabled="{x:Bind ViewModel.CanUndo, Mode=OneWay}" Width="44" Height="44"
                                         PointerEntered="Button_PointerEntered" PointerExited="Button_PointerExited"
                                         PointerPressed="Button_PointerPressed" PointerReleased="Button_PointerReleased"
-                                        ToolTipService.ToolTip="Restore All">
-                                    <TextBlock Text="&#xE777;" FontFamily="{ThemeResource SymbolThemeFontFamily}" FontSize="14" />
+                                        ToolTipService.ToolTip="Restore All"
+                                        CornerRadius="10">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <FontIcon Glyph="&#xE777;" FontSize="16" />
+                                        <TextBlock Text="Restore" VerticalAlignment="Center" FontSize="13" />
+                                    </StackPanel>
                                 </Button>
                                 <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center"
                                             Visibility="{x:Bind ViewModel.WorkingVisibility, Mode=OneWay}">

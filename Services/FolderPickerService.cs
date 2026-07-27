@@ -6,34 +6,42 @@ using WinRT.Interop;
 
 namespace FluentFold.Services;
 
-public sealed class FolderPickerService(IWindowService windowService, ILogger<FolderPickerService> logger) : IFolderPickerService
+public sealed class FolderPickerService(ILogger<FolderPickerService> logger) : IFolderPickerService
 {
     public async Task<StorageFolder?> PickFolderAsync()
     {
-        var picker = new FolderPicker
+        try
         {
-            ViewMode = PickerViewMode.List,
-            SuggestedStartLocation = PickerLocationId.DocumentsLibrary
-        };
-        picker.FileTypeFilter.Add("*");
-
-        InitializeWithWindow.Initialize(picker, windowService.WindowHandle);
-
-        var folder = await picker.PickSingleFolderAsync();
-        if (folder is not null)
-        {
-            try
+            var picker = new FolderPicker
             {
-                StorageApplicationPermissions.FutureAccessList.AddOrReplace("PickedFolderToken", folder);
-            }
-            catch (Exception ex)
+                ViewMode = PickerViewMode.List,
+            };
+            picker.FileTypeFilter.Add("*");
+
+            var hwnd = WindowNative.GetWindowHandle(App.MainWindow);
+            InitializeWithWindow.Initialize(picker, hwnd);
+
+            var folder = await picker.PickSingleFolderAsync();
+            if (folder is not null)
             {
-                logger.LogWarning(ex, "Failed to persist folder access token (unpackaged mode)");
+                try
+                {
+                    StorageApplicationPermissions.FutureAccessList.AddOrReplace("PickedFolderToken", folder);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogWarning(ex, "Failed to persist folder access token (unpackaged mode)");
+                }
+                logger.LogInformation("Folder picked: '{Path}'", folder.Path);
             }
-            logger.LogInformation("Folder picked: '{Path}'", folder.Path);
+
+            return folder;
         }
-
-        return folder;
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "PickFolderAsync failed");
+            throw;
+        }
     }
 
     public async Task<StorageFolder?> GetPersistedFolderAsync()
