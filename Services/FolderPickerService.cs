@@ -6,19 +6,22 @@ using WinRT.Interop;
 
 namespace FluentFold.Services;
 
-public sealed class FolderPickerService(ILogger<FolderPickerService> logger) : IFolderPickerService
+public sealed class FolderPickerService(IWindowService windowService, ILogger<FolderPickerService> logger) : IFolderPickerService
 {
     public async Task<StorageFolder?> PickFolderAsync()
     {
         try
         {
+            var hwnd = windowService.WindowHandle;
+            if (hwnd == IntPtr.Zero)
+                throw new InvalidOperationException("Main window handle is not available");
+
             var picker = new FolderPicker
             {
                 ViewMode = PickerViewMode.List,
             };
             picker.FileTypeFilter.Add("*");
 
-            var hwnd = WindowNative.GetWindowHandle(App.MainWindow);
             InitializeWithWindow.Initialize(picker, hwnd);
 
             var folder = await picker.PickSingleFolderAsync();

@@ -45,7 +45,7 @@
                                 <TextBlock Text="Organize your files in seconds" FontSize="14"
                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
                             </StackPanel>
-                            <Button Command="{x:Bind ViewModel.PickFolderCommand}" HorizontalAlignment="Center"
+                            <Button x:Name="StandardSelectFolderButton" Command="{x:Bind ViewModel.PickFolderCommand}" HorizontalAlignment="Center"
                                     PointerEntered="Button_PointerEntered" PointerExited="Button_PointerExited"
                                     PointerPressed="Button_PointerPressed" PointerReleased="Button_PointerReleased"
                                     ToolTipService.ToolTip="Select a folder"
@@ -200,7 +200,7 @@
                     <Border Style="{StaticResource FluentCardStyle}" Padding="20">
                         <StackPanel Spacing="16">
                             <StackPanel Orientation="Horizontal" Spacing="12">
-                                <Button Command="{x:Bind ViewModel.PickFolderCommand}" Width="44" Height="44"
+                                <Button x:Name="ProSelectFolderButton" Command="{x:Bind ViewModel.PickFolderCommand}" Width="44" Height="44"
                                         PointerEntered="Button_PointerEntered" PointerExited="Button_PointerExited"
                                         PointerPressed="Button_PointerPressed" PointerReleased="Button_PointerReleased"
                                         ToolTipService.ToolTip="Select Folder"
@@ -564,5 +564,31 @@
                 </StackPanel>
             </Border>
         </Grid>
+
+        <!-- ===== TEACHING TIPS ===== -->
+        <TeachingTip x:Name="StandardSelectFolderTip"
+                     Target="StandardSelectFolderButton"
+                     Title="Select a Folder"
+                     Subtitle="Pick any folder on your PC and FluentFold will categorize its files into Images, Documents, Videos, and more."
+                     Placement="Bottom"
+                     IsLightDismissEnabled="True" />
+        <TeachingTip x:Name="HeroOrganizeTip"
+                     Target="HeroOrganizeButton"
+                     Title="Organize Files"
+                     Subtitle="This will sort all files into categorized folders with one click. You can undo anytime."
+                     Placement="Bottom"
+                     IsLightDismissEnabled="True" />
+        <TeachingTip x:Name="ProSelectFolderTip"
+                     Target="ProSelectFolderButton"
+                     Title="Select a Folder"
+                     Subtitle="Pick any folder to analyze and organize. Pro mode gives you custom rules and renaming."
+                     Placement="Bottom"
+                     IsLightDismissEnabled="True" />
+        <TeachingTip x:Name="ProOrganizeTip"
+                     Target="OrganizeButton"
+                     Title="Organize Files"
+                     Subtitle="Sorts files into categorized folders. You can customize rules in the Control Panel below."
+                     Placement="Bottom"
+                     IsLightDismissEnabled="True" />
     </Grid>
 </Page>

@@ -7,6 +7,7 @@ using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Composition;
 using System.Numerics;
 using FluentFold.Models;
+using FluentFold.Services;
 using FluentFold.ViewModels;
 
 namespace FluentFold.Views;
@@ -17,6 +18,8 @@ public sealed partial class OrganizerPage : Page
 
     private Compositor? _compositor;
     private SpringVector3NaturalMotionAnimation? _springAnimation;
+    private bool _selectFolderTipShown;
+    private bool _organizeTipShown;
 
     public OrganizerPage()
     {
@@ -45,6 +48,54 @@ public sealed partial class OrganizerPage : Page
             System.Diagnostics.Debug.WriteLine($"[OrganizerPage] Compositor init failed: {ex}");
         }
         ViewModel.RefreshMode();
+        ViewModel.PropertyChanged += OnViewModelPropertyChanged;
+        _ = ShowSelectFolderTeachingTipAsync();
+    }
+
+    private void OnViewModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(ViewModel.HasFolder) && ViewModel.HasFolder)
+        {
+            _ = ShowOrganizeTeachingTipAsync();
+        }
+    }
+
+    private async Task ShowSelectFolderTeachingTipAsync()
+    {
+        if (_selectFolderTipShown) return;
+        var settings = App.Services.GetRequiredService<IAppSettingsService>();
+        if (!settings.ShowTeachingTips) return;
+
+        _selectFolderTipShown = true;
+        await Task.Delay(800);
+
+        if (ViewModel.IsStandardMode && StandardSelectFolderButton.IsLoaded)
+        {
+            StandardSelectFolderTip.IsOpen = true;
+        }
+        else if (ViewModel.IsProMode && ProSelectFolderButton.IsLoaded)
+        {
+            ProSelectFolderTip.IsOpen = true;
+        }
+    }
+
+    private async Task ShowOrganizeTeachingTipAsync()
+    {
+        if (_organizeTipShown) return;
+        var settings = App.Services.GetRequiredService<IAppSettingsService>();
+        if (!settings.ShowTeachingTips) return;
+
+        _organizeTipShown = true;
+        await Task.Delay(600);
+
+        if (ViewModel.IsStandardMode && HeroOrganizeButton.IsLoaded)
+        {
+            HeroOrganizeTip.IsOpen = true;
+        }
+        else if (ViewModel.IsProMode && OrganizeButton.IsLoaded)
+        {
+            ProOrganizeTip.IsOpen = true;
+        }
     }
 
     private void OnRemoveRuleClick(object sender, RoutedEventArgs e)
