@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using Windows.Storage;
 using Microsoft.Windows.AppNotifications;
 using Microsoft.Windows.AppNotifications.Builder;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using FluentFold.Models;
 using FluentFold.Services;
@@ -59,11 +60,17 @@ public sealed partial class OrganizerViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ShowSelectButton))]
+    [NotifyPropertyChangedFor(nameof(FolderSelectedVisibility))]
     private bool _hasFolder;
+
+    public Visibility FolderSelectedVisibility => HasFolder ? Visibility.Visible : Visibility.Collapsed;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ProgressPercent))]
+    [NotifyPropertyChangedFor(nameof(WorkingVisibility))]
     private bool _isWorking;
+
+    public Visibility WorkingVisibility => IsWorking ? Visibility.Visible : Visibility.Collapsed;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ProgressPercent))]
