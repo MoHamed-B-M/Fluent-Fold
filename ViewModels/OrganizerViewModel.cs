@@ -316,10 +316,18 @@ public sealed partial class OrganizerViewModel : ObservableObject
     [RelayCommand]
     private async Task PickFolderAsync()
     {
-        var folder = await _folderPicker.PickFolderAsync();
-        if (folder is null) return;
+        try
+        {
+            var folder = await _folderPicker.PickFolderAsync();
+            if (folder is null) return;
 
-        await LoadFolderAsync(folder);
+            await LoadFolderAsync(folder);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to pick folder");
+            ShowInfoBar($"Could not open folder picker: {ex.Message}", InfoBarSeverity.Error);
+        }
     }
 
     [RelayCommand]

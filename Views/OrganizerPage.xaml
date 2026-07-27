@@ -94,65 +94,70 @@
                         </StackPanel>
                     </Border>
 
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="8"
-                                Visibility="{x:Bind ViewModel.FolderSelectedVisibility, Mode=OneWay}">
+                    <ItemsControl Visibility="{x:Bind ViewModel.FolderSelectedVisibility, Mode=OneWay}"
+                                  HorizontalAlignment="Center">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" Spacing="8" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
                         <Border Style="{StaticResource StatCardStyle}">
-                            <StackPanel HorizontalAlignment="Center" Spacing="2">
-                                <TextBlock Text="&#xE722;" FontFamily="{ThemeResource SymbolThemeFontFamily}"
-                                           FontSize="18" HorizontalAlignment="Center" Foreground="{ThemeResource SystemAccentColor}" />
-                                <TextBlock Text="{x:Bind ViewModel.ImageCount, Mode=OneWay}" FontWeight="Bold" HorizontalAlignment="Center" />
+                            <StackPanel HorizontalAlignment="Center" Spacing="2" MinWidth="64">
+                                <FontIcon Glyph="&#xE722;" FontSize="22" HorizontalAlignment="Center"
+                                          Foreground="{ThemeResource SystemAccentColor}" />
+                                <TextBlock Text="{x:Bind ViewModel.ImageCount, Mode=OneWay}" FontWeight="Bold" HorizontalAlignment="Center" FontSize="15" />
                                 <TextBlock Text="Images" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
                             </StackPanel>
                         </Border>
                         <Border Style="{StaticResource StatCardStyle}">
-                            <StackPanel HorizontalAlignment="Center" Spacing="2">
-                                <TextBlock Text="&#xE8A5;" FontFamily="{ThemeResource SymbolThemeFontFamily}"
-                                           FontSize="18" HorizontalAlignment="Center" Foreground="{ThemeResource SystemAccentColor}" />
-                                <TextBlock Text="{x:Bind ViewModel.DocumentCount, Mode=OneWay}" FontWeight="Bold" HorizontalAlignment="Center" />
+                            <StackPanel HorizontalAlignment="Center" Spacing="2" MinWidth="64">
+                                <FontIcon Glyph="&#xE8A5;" FontSize="22" HorizontalAlignment="Center"
+                                          Foreground="{ThemeResource SystemAccentColor}" />
+                                <TextBlock Text="{x:Bind ViewModel.DocumentCount, Mode=OneWay}" FontWeight="Bold" HorizontalAlignment="Center" FontSize="15" />
                                 <TextBlock Text="Documents" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
                             </StackPanel>
                         </Border>
                         <Border Style="{StaticResource StatCardStyle}">
-                            <StackPanel HorizontalAlignment="Center" Spacing="2">
-                                <TextBlock Text="&#xE714;" FontFamily="{ThemeResource SymbolThemeFontFamily}"
-                                           FontSize="18" HorizontalAlignment="Center" Foreground="{ThemeResource SystemAccentColor}" />
-                                <TextBlock Text="{x:Bind ViewModel.VideoCount, Mode=OneWay}" FontWeight="Bold" HorizontalAlignment="Center" />
+                            <StackPanel HorizontalAlignment="Center" Spacing="2" MinWidth="64">
+                                <FontIcon Glyph="&#xE714;" FontSize="22" HorizontalAlignment="Center"
+                                          Foreground="{ThemeResource SystemAccentColor}" />
+                                <TextBlock Text="{x:Bind ViewModel.VideoCount, Mode=OneWay}" FontWeight="Bold" HorizontalAlignment="Center" FontSize="15" />
                                 <TextBlock Text="Videos" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
                             </StackPanel>
                         </Border>
                         <Border Style="{StaticResource StatCardStyle}">
-                            <StackPanel HorizontalAlignment="Center" Spacing="2">
-                                <TextBlock Text="&#xE8D6;" FontFamily="{ThemeResource SymbolThemeFontFamily}"
-                                           FontSize="18" HorizontalAlignment="Center" Foreground="{ThemeResource SystemAccentColor}" />
-                                <TextBlock Text="{x:Bind ViewModel.AudioCount, Mode=OneWay}" FontWeight="Bold" HorizontalAlignment="Center" />
+                            <StackPanel HorizontalAlignment="Center" Spacing="2" MinWidth="64">
+                                <FontIcon Glyph="&#xE8D6;" FontSize="22" HorizontalAlignment="Center"
+                                          Foreground="{ThemeResource SystemAccentColor}" />
+                                <TextBlock Text="{x:Bind ViewModel.AudioCount, Mode=OneWay}" FontWeight="Bold" HorizontalAlignment="Center" FontSize="15" />
                                 <TextBlock Text="Audio" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
                             </StackPanel>
                         </Border>
                         <Border Style="{StaticResource StatCardStyle}">
-                            <StackPanel HorizontalAlignment="Center" Spacing="2">
-                                <TextBlock Text="&#xE773;" FontFamily="{ThemeResource SymbolThemeFontFamily}"
-                                           FontSize="18" HorizontalAlignment="Center" Foreground="{ThemeResource SystemAccentColor}" />
-                                <TextBlock Text="{x:Bind ViewModel.ArchiveCount, Mode=OneWay}" FontWeight="Bold" HorizontalAlignment="Center" />
+                            <StackPanel HorizontalAlignment="Center" Spacing="2" MinWidth="64">
+                                <FontIcon Glyph="&#xE773;" FontSize="22" HorizontalAlignment="Center"
+                                          Foreground="{ThemeResource SystemAccentColor}" />
+                                <TextBlock Text="{x:Bind ViewModel.ArchiveCount, Mode=OneWay}" FontWeight="Bold" HorizontalAlignment="Center" FontSize="15" />
                                 <TextBlock Text="Archives" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
                             </StackPanel>
                         </Border>
                         <Border Style="{StaticResource StatCardStyle}">
-                            <StackPanel HorizontalAlignment="Center" Spacing="2">
-                                <TextBlock Text="&#xE943;" FontFamily="{ThemeResource SymbolThemeFontFamily}"
-                                           FontSize="18" HorizontalAlignment="Center" Foreground="{ThemeResource SystemAccentColor}" />
-                                <TextBlock Text="{x:Bind ViewModel.CodeCount, Mode=OneWay}" FontWeight="Bold" HorizontalAlignment="Center" />
+                            <StackPanel HorizontalAlignment="Center" Spacing="2" MinWidth="64">
+                                <FontIcon Glyph="&#xE943;" FontSize="22" HorizontalAlignment="Center"
+                                          Foreground="{ThemeResource SystemAccentColor}" />
+                                <TextBlock Text="{x:Bind ViewModel.CodeCount, Mode=OneWay}" FontWeight="Bold" HorizontalAlignment="Center" FontSize="15" />
                                 <TextBlock Text="Code" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
                             </StackPanel>
                         </Border>
                         <Border Style="{StaticResource StatCardStyle}">
-                            <StackPanel HorizontalAlignment="Center" Spacing="2">
-                                <TextBlock Text="&#xE771;" FontFamily="{ThemeResource SymbolThemeFontFamily}"
-                                           FontSize="18" HorizontalAlignment="Center" Foreground="{ThemeResource SystemAccentColor}" />
-                                <TextBlock Text="{x:Bind ViewModel.OtherCount, Mode=OneWay}" FontWeight="Bold" HorizontalAlignment="Center" />
+                            <StackPanel HorizontalAlignment="Center" Spacing="2" MinWidth="64">
+                                <FontIcon Glyph="&#xE771;" FontSize="22" HorizontalAlignment="Center"
+                                          Foreground="{ThemeResource SystemAccentColor}" />
+                                <TextBlock Text="{x:Bind ViewModel.OtherCount, Mode=OneWay}" FontWeight="Bold" HorizontalAlignment="Center" FontSize="15" />
                                 <TextBlock Text="Other" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
                             </StackPanel>
                         </Border>
-                    </StackPanel>
+                    </ItemsControl>
                 </StackPanel>
 
                 <!-- ====== PRO MODE ====== -->
@@ -232,45 +237,59 @@
                                     <RowDefinition Height="Auto" />
                                 </Grid.RowDefinitions>
                                 <Border Grid.Column="0" Grid.Row="0" Style="{StaticResource StatCardStyle}">
-                                    <StackPanel Spacing="2">
-                                        <TextBlock Text="Images" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                        <TextBlock Text="{x:Bind ViewModel.ImageCount, Mode=OneWay}" FontSize="22" FontWeight="Bold" />
+                                    <StackPanel Spacing="2" HorizontalAlignment="Center">
+                                        <FontIcon Glyph="&#xE722;" FontSize="20" HorizontalAlignment="Center"
+                                                  Foreground="{ThemeResource SystemAccentColor}" />
+                                        <TextBlock Text="{x:Bind ViewModel.ImageCount, Mode=OneWay}" FontSize="22" FontWeight="Bold" HorizontalAlignment="Center" />
+                                        <TextBlock Text="Images" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
                                     </StackPanel>
                                 </Border>
                                 <Border Grid.Column="1" Grid.Row="0" Style="{StaticResource StatCardStyle}">
-                                    <StackPanel Spacing="2">
-                                        <TextBlock Text="Documents" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                        <TextBlock Text="{x:Bind ViewModel.DocumentCount, Mode=OneWay}" FontSize="22" FontWeight="Bold" />
+                                    <StackPanel Spacing="2" HorizontalAlignment="Center">
+                                        <FontIcon Glyph="&#xE8A5;" FontSize="20" HorizontalAlignment="Center"
+                                                  Foreground="{ThemeResource SystemAccentColor}" />
+                                        <TextBlock Text="{x:Bind ViewModel.DocumentCount, Mode=OneWay}" FontSize="22" FontWeight="Bold" HorizontalAlignment="Center" />
+                                        <TextBlock Text="Documents" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
                                     </StackPanel>
                                 </Border>
                                 <Border Grid.Column="2" Grid.Row="0" Style="{StaticResource StatCardStyle}">
-                                    <StackPanel Spacing="2">
-                                        <TextBlock Text="Videos" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                        <TextBlock Text="{x:Bind ViewModel.VideoCount, Mode=OneWay}" FontSize="22" FontWeight="Bold" />
+                                    <StackPanel Spacing="2" HorizontalAlignment="Center">
+                                        <FontIcon Glyph="&#xE714;" FontSize="20" HorizontalAlignment="Center"
+                                                  Foreground="{ThemeResource SystemAccentColor}" />
+                                        <TextBlock Text="{x:Bind ViewModel.VideoCount, Mode=OneWay}" FontSize="22" FontWeight="Bold" HorizontalAlignment="Center" />
+                                        <TextBlock Text="Videos" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
                                     </StackPanel>
                                 </Border>
                                 <Border Grid.Column="3" Grid.Row="0" Style="{StaticResource StatCardStyle}">
-                                    <StackPanel Spacing="2">
-                                        <TextBlock Text="Audio" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                        <TextBlock Text="{x:Bind ViewModel.AudioCount, Mode=OneWay}" FontSize="22" FontWeight="Bold" />
+                                    <StackPanel Spacing="2" HorizontalAlignment="Center">
+                                        <FontIcon Glyph="&#xE8D6;" FontSize="20" HorizontalAlignment="Center"
+                                                  Foreground="{ThemeResource SystemAccentColor}" />
+                                        <TextBlock Text="{x:Bind ViewModel.AudioCount, Mode=OneWay}" FontSize="22" FontWeight="Bold" HorizontalAlignment="Center" />
+                                        <TextBlock Text="Audio" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
                                     </StackPanel>
                                 </Border>
                                 <Border Grid.Column="0" Grid.Row="1" Style="{StaticResource StatCardStyle}">
-                                    <StackPanel Spacing="2">
-                                        <TextBlock Text="Archives" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                        <TextBlock Text="{x:Bind ViewModel.ArchiveCount, Mode=OneWay}" FontSize="22" FontWeight="Bold" />
+                                    <StackPanel Spacing="2" HorizontalAlignment="Center">
+                                        <FontIcon Glyph="&#xE773;" FontSize="20" HorizontalAlignment="Center"
+                                                  Foreground="{ThemeResource SystemAccentColor}" />
+                                        <TextBlock Text="{x:Bind ViewModel.ArchiveCount, Mode=OneWay}" FontSize="22" FontWeight="Bold" HorizontalAlignment="Center" />
+                                        <TextBlock Text="Archives" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
                                     </StackPanel>
                                 </Border>
                                 <Border Grid.Column="1" Grid.Row="1" Style="{StaticResource StatCardStyle}">
-                                    <StackPanel Spacing="2">
-                                        <TextBlock Text="Code" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                        <TextBlock Text="{x:Bind ViewModel.CodeCount, Mode=OneWay}" FontSize="22" FontWeight="Bold" />
+                                    <StackPanel Spacing="2" HorizontalAlignment="Center">
+                                        <FontIcon Glyph="&#xE943;" FontSize="20" HorizontalAlignment="Center"
+                                                  Foreground="{ThemeResource SystemAccentColor}" />
+                                        <TextBlock Text="{x:Bind ViewModel.CodeCount, Mode=OneWay}" FontSize="22" FontWeight="Bold" HorizontalAlignment="Center" />
+                                        <TextBlock Text="Code" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
                                     </StackPanel>
                                 </Border>
                                 <Border Grid.Column="2" Grid.Row="1" Style="{StaticResource StatCardStyle}">
-                                    <StackPanel Spacing="2">
-                                        <TextBlock Text="Other" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                        <TextBlock Text="{x:Bind ViewModel.OtherCount, Mode=OneWay}" FontSize="22" FontWeight="Bold" />
+                                    <StackPanel Spacing="2" HorizontalAlignment="Center">
+                                        <FontIcon Glyph="&#xE771;" FontSize="20" HorizontalAlignment="Center"
+                                                  Foreground="{ThemeResource SystemAccentColor}" />
+                                        <TextBlock Text="{x:Bind ViewModel.OtherCount, Mode=OneWay}" FontSize="22" FontWeight="Bold" HorizontalAlignment="Center" />
+                                        <TextBlock Text="Other" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
                                     </StackPanel>
                                 </Border>
                             </Grid>

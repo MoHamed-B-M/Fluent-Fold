@@ -100,8 +100,25 @@
                     </StackPanel>
                 </Border>
 
+                <Border Style="{StaticResource SettingsCardStyle}" Padding="20">
+                    <StackPanel Spacing="14">
+                        <TextBlock Text="Uninstall" FontWeight="SemiBold" FontSize="16"
+                                   Foreground="{ThemeResource SystemErrorTextColor}" />
+                        <CheckBox x:Name="DeleteDataCheckBox" Content="Delete all app data (settings, cache, logs)" />
+                        <TextBlock TextWrapping="Wrap" FontSize="12"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}">
+                            This will remove FluentFold and all its data from your system.
+                        </TextBlock>
+                        <Button Content="Uninstall FluentFold" Click="OnUninstallClick"
+                                Foreground="White"
+                                Background="{ThemeResource SystemErrorTextColor}"
+                                BorderThickness="0"
+                                CornerRadius="8"
+                                Padding="16,8" />
+                    </StackPanel>
+                </Border>
+
                 <StackPanel Orientation="Horizontal" Spacing="12">
-                    <Button Content="Save" Click="OnSaveClick" Style="{StaticResource AccentButtonStyle}" />
                     <Button Content="Reset to Defaults" Command="{x:Bind ViewModel.ResetToDefaultsCommand}" />
                 </StackPanel>
             </StackPanel>

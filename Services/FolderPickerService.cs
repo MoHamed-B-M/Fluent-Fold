@@ -22,7 +22,14 @@ public sealed class FolderPickerService(IWindowService windowService, ILogger<Fo
         var folder = await picker.PickSingleFolderAsync();
         if (folder is not null)
         {
-            StorageApplicationPermissions.FutureAccessList.AddOrReplace("PickedFolderToken", folder);
+            try
+            {
+                StorageApplicationPermissions.FutureAccessList.AddOrReplace("PickedFolderToken", folder);
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Failed to persist folder access token (unpackaged mode)");
+            }
             logger.LogInformation("Folder picked: '{Path}'", folder.Path);
         }
 
