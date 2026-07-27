@@ -31,4 +31,6 @@ public interface IAppSettingsService
     bool UseRecycleBin { get; set; }
     /// <summary>The current sort mode for file listings.</summary>
     string SortMode { get; set; }
+    /// <summary>Whether to automatically check for updates on startup.</summary>
+    bool AutoCheckUpdates { get; set; }
 }

@@ -241,6 +241,12 @@ public sealed class AppSettingsService : IAppSettingsService, IDisposable
         set => Set(nameof(SortMode), value);
     }
 
+    public bool AutoCheckUpdates
+    {
+        get => Get(nameof(AutoCheckUpdates), true);
+        set => Set(nameof(AutoCheckUpdates), value);
+    }
+
     public void Dispose()
     {
         if (_disposed) return;

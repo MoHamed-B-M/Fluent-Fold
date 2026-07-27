@@ -76,6 +76,25 @@
 
                 <Border Style="{StaticResource SettingsCardStyle}" Padding="20">
                     <StackPanel Spacing="14">
+                        <TextBlock Text="Updates" FontWeight="SemiBold" FontSize="16" />
+                        <ToggleSwitch Header="Auto-check for updates on startup" OnContent="On" OffContent="Off"
+                                      IsOn="{x:Bind ViewModel.AutoCheckUpdates, Mode=TwoWay}" />
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <Button Command="{x:Bind ViewModel.CheckForUpdatesCommand}"
+                                    Visibility="{x:Bind ViewModel.CheckButtonVisibility, Mode=OneWay}"
+                                    Content="Check for Updates" />
+                            <ProgressRing IsActive="{x:Bind ViewModel.IsCheckingForUpdate, Mode=OneWay}"
+                                          Visibility="{x:Bind ViewModel.CheckingProgressVisibility, Mode=OneWay}"
+                                          Width="18" Height="18" />
+                        </StackPanel>
+                        <TextBlock Text="{x:Bind ViewModel.UpdateStatus, Mode=OneWay}"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                   FontSize="13" />
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource SettingsCardStyle}" Padding="20">
+                    <StackPanel Spacing="14">
                         <TextBlock Text="Onboarding" FontWeight="SemiBold" FontSize="16" />
                         <Button Content="Reset Onboarding" Click="OnResetOnboardingClick" />
                     </StackPanel>

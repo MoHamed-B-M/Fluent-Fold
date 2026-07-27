@@ -48,6 +48,25 @@ public sealed partial class MainWindow : Window
         ViewModel.Initialize(ContentFrame);
         await Task.Delay(200);
         ShowOnboarding();
+        _ = CheckForUpdatesAsync();
+    }
+
+    private async Task CheckForUpdatesAsync()
+    {
+        try
+        {
+            await Task.Delay(3000);
+            var updater = App.Services.GetRequiredService<IUpdateService>();
+            var info = await updater.CheckForUpdatesAsync();
+            if (info.IsAvailable && _settings.AutoCheckUpdates)
+            {
+                _logger.LogInformation("Update available: v{Latest}", info.LatestVersion);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Auto-update check failed");
+        }
     }
 
     private void SetAppIcon()

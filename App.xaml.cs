@@ -63,6 +63,7 @@ public partial class App : Application
         services.AddSingleton<IAppSettingsService, AppSettingsService>();
         services.AddSingleton<IUndoService, UndoService>();
         services.AddSingleton<IFirstLaunchService, FirstLaunchService>();
+        services.AddSingleton<IUpdateService, UpdateService>();
         services.AddTransient<IFolderPickerService, FolderPickerService>();
         services.AddTransient<IOrganizerService, OrganizerService>();
         services.AddTransient<IAnalyzerService, AnalyzerService>();
