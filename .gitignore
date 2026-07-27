@@ -42,3 +42,6 @@ Thumbs.db
 
 # Skill lock files
 skills-lock.json
+
+# Inno Setup output
+_r2/
