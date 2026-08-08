@@ -1,6 +1,9 @@
 <Project>
-  <ItemGroup>
-    <Analyzer Include="C:\Users\Admin\Documents\winui3\Sorty\FluentFoldwinui3\FluentFold\.opencode\skills\winui-dev-workflow\analyzer\Microsoft.WindowsAppSDK.Analyzers.dll" />
+  <PropertyGroup>
+    <_WinAppAnalyzerDir Condition="Exists('$(MSBuildThisFileDirectory).opencode\skills\winui-dev-workflow\analyzer')">$(MSBuildThisFileDirectory).opencode\skills\winui-dev-workflow\analyzer</_WinAppAnalyzerDir>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(_WinAppAnalyzerDir)' != ''">
+    <Analyzer Include="$(_WinAppAnalyzerDir)\Microsoft.WindowsAppSDK.Analyzers.dll" />
   </ItemGroup>
-  <Import Project="C:\Users\Admin\Documents\winui3\Sorty\FluentFoldwinui3\FluentFold\.opencode\skills\winui-dev-workflow\analyzer\Microsoft.WindowsAppSDK.Analyzers.targets" />
+  <Import Project="$(_WinAppAnalyzerDir)\Microsoft.WindowsAppSDK.Analyzers.targets" Condition="'$(_WinAppAnalyzerDir)' != ''" />
 </Project>
