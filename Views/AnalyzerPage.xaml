@@ -15,59 +15,70 @@
                 <TextBlock Text="Analyzer" Style="{StaticResource TitleTextBlockStyle}" />
 
                 <!-- ===== IDLE STATE ===== -->
-                <StackPanel
-                    Visibility="{x:Bind ViewModel.IdleVisibility, Mode=OneWay}"
-                    HorizontalAlignment="Center" Spacing="24" Margin="0,40">
+                <Border Style="{StaticResource HeroCardStyle}" HorizontalAlignment="Center"
+                        Visibility="{x:Bind ViewModel.IdleVisibility, Mode=OneWay}">
+                    <StackPanel Spacing="24" HorizontalAlignment="Center">
 
-                    <Grid Width="200" Height="200" HorizontalAlignment="Center">
-                        <Ellipse x:Name="GlowEllipse"
-                            Width="200" Height="200"
-                            Fill="{ThemeResource SystemAccentColor}"
-                            Opacity="0.12"
-                            HorizontalAlignment="Center" VerticalAlignment="Center" />
-                        <Button
-                            Command="{x:Bind ViewModel.StartScanCommand}"
-                            Width="160" Height="160"
-                            CornerRadius="80"
-                            Background="{ThemeResource SystemAccentColor}"
-                            Foreground="White"
-                            FontSize="18"
-                            FontWeight="SemiBold"
-                            HorizontalAlignment="Center" VerticalAlignment="Center"
-                            PointerEntered="ScanButton_PointerEntered"
-                            PointerExited="ScanButton_PointerExited"
-                            PointerPressed="ScanButton_PointerPressed"
-                            PointerReleased="ScanButton_PointerReleased">
-                            <StackPanel Spacing="8" HorizontalAlignment="Center">
-                                <TextBlock Text="&#xE8D3;" FontFamily="{ThemeResource SymbolThemeFontFamily}"
-                                           FontSize="40" HorizontalAlignment="Center" />
-                                <TextBlock Text="Analyze" HorizontalAlignment="Center" />
-                            </StackPanel>
-                        </Button>
-                    </Grid>
+                        <Grid Width="200" Height="200" HorizontalAlignment="Center">
+                            <Ellipse x:Name="GlowEllipse"
+                                Width="200" Height="200"
+                                Fill="{ThemeResource SystemAccentColor}"
+                                Opacity="0.12"
+                                HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            <Button
+                                Command="{x:Bind ViewModel.StartScanCommand}"
+                                Width="160" Height="160"
+                                CornerRadius="80"
+                                Background="{ThemeResource SystemAccentColor}"
+                                Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
+                                FontSize="18"
+                                FontWeight="SemiBold"
+                                HorizontalAlignment="Center" VerticalAlignment="Center"
+                                ToolTipService.ToolTip="Start scanning for junk files"
+                                AutomationProperties.AutomationId="StartScanButton"
+                                AutomationProperties.Name="Start scan"
+                                PointerEntered="ScanButton_PointerEntered"
+                                PointerExited="ScanButton_PointerExited"
+                                PointerPressed="ScanButton_PointerPressed"
+                                PointerReleased="ScanButton_PointerReleased">
+                                <StackPanel Spacing="8" HorizontalAlignment="Center">
+                                    <TextBlock Text="&#xE8D3;" FontFamily="{ThemeResource SymbolThemeFontFamily}"
+                                               FontSize="40" HorizontalAlignment="Center" />
+                                    <TextBlock Text="Analyze" HorizontalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+                        </Grid>
 
-                    <TextBlock Text="Scan system for junk files, cache, and duplicates"
-                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                               HorizontalAlignment="Center" FontSize="14" />
-                    <TextBlock Text="Click the button above to start"
-                               Foreground="{ThemeResource TextFillColorTertiaryBrush}"
-                               HorizontalAlignment="Center" FontSize="12" />
-                </StackPanel>
+                        <StackPanel Spacing="6" HorizontalAlignment="Center">
+                            <TextBlock Text="Scan for junk files, cache, and duplicates"
+                                       Style="{StaticResource BodyTextBlockStyle}"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                       HorizontalAlignment="Center" />
+                            <TextBlock Text="Click the button above to start"
+                                       Style="{StaticResource CaptionTextBlockStyle}"
+                                       Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                                       HorizontalAlignment="Center" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
 
                 <!-- ===== SCANNING STATE ===== -->
                 <Border
                     Visibility="{x:Bind ViewModel.ScanningVisibility, Mode=OneWay}"
                     Style="{StaticResource FluentCardStyle}"
                     HorizontalAlignment="Center"
-                    MinWidth="360">
+                    MinWidth="440"
+                    Padding="48,32">
                     <StackPanel Spacing="16" HorizontalAlignment="Center">
-                        <ProgressRing IsActive="True" Width="40" Height="40" HorizontalAlignment="Center" />
-                        <ProgressBar
-                            Value="{x:Bind ViewModel.ScanProgress, Mode=OneWay}"
-                            IsIndeterminate="False"
-                            Width="280" />
+                        <ProgressRing IsActive="True" Width="48" Height="48" HorizontalAlignment="Center"
+                                      AutomationProperties.Name="Scanning" />
                         <TextBlock
                             Text="{x:Bind ViewModel.ProgressPercent, Mode=OneWay}"
+                            Style="{StaticResource BodyStrongTextBlockStyle}"
+                            HorizontalAlignment="Center" />
+                        <TextBlock
+                            Text="{x:Bind ViewModel.ProgressTimeText, Mode=OneWay}"
+                            Style="{StaticResource CaptionTextBlockStyle}"
                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                             HorizontalAlignment="Center" />
                         <Button Command="{x:Bind ViewModel.CancelScanCommand}"
@@ -75,6 +86,8 @@
                                 FontFamily="{ThemeResource SymbolThemeFontFamily}"
                                 HorizontalAlignment="Center"
                                 Width="36" Height="36"
+                                AutomationProperties.AutomationId="CancelScanButton"
+                                AutomationProperties.Name="Cancel scan"
                                 ToolTipService.ToolTip="Cancel" />
                     </StackPanel>
                 </Border>
@@ -92,8 +105,9 @@
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Column="0" Spacing="4">
-                                <TextBlock Text="Storage Analysis" FontSize="20" FontWeight="Bold" />
-                                <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="14">
+                                <TextBlock Text="Storage Analysis" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                                <TextBlock Style="{StaticResource CaptionTextBlockStyle}"
+                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}">
                                     <Run Text="Found " />
                                     <Run Text="{x:Bind ViewModel.TotalItems, Mode=OneWay}" FontWeight="Bold" />
                                     <Run Text=" items taking " />
@@ -101,11 +115,17 @@
                                 </TextBlock>
                             </StackPanel>
                             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                                <Button Command="{x:Bind ViewModel.SelectAllCommand}" Content="Select All" />
-                                <Button Command="{x:Bind ViewModel.DeselectAllCommand}" Content="Deselect All" />
+                                <Button Command="{x:Bind ViewModel.SelectAllCommand}" Content="Select All"
+                                        AutomationProperties.AutomationId="SelectAllButton"
+                                        AutomationProperties.Name="Select all items" />
+                                <Button Command="{x:Bind ViewModel.DeselectAllCommand}" Content="Deselect All"
+                                        AutomationProperties.AutomationId="DeselectAllButton"
+                                        AutomationProperties.Name="Deselect all items" />
                                 <Button Command="{x:Bind ViewModel.DeleteSelectedCommand}"
                                         Style="{StaticResource AccentButtonStyle}"
-                                        IsEnabled="{x:Bind ViewModel.IsNotDeleting, Mode=OneWay}">
+                                        IsEnabled="{x:Bind ViewModel.IsNotDeleting, Mode=OneWay}"
+                                        AutomationProperties.AutomationId="DeleteSelectedButton"
+                                        AutomationProperties.Name="Delete selected items">
                                     <StackPanel Orientation="Horizontal" Spacing="6">
                                         <TextBlock Text="&#xE74D;" FontFamily="{ThemeResource SymbolThemeFontFamily}" FontSize="14" />
                                         <TextBlock Text="Delete" />
@@ -115,98 +135,217 @@
                         </Grid>
                     </Border>
 
-                    <!-- Dashboard Cards Grid -->
-                    <ItemsRepeater
-                        ItemsSource="{x:Bind ViewModel.DashboardCards, Mode=OneWay}">
-                        <ItemsRepeater.Layout>
-                            <UniformGridLayout
-                                MinColumnSpacing="16"
-                                MinRowSpacing="16"
-                                MinItemWidth="320" />
-                        </ItemsRepeater.Layout>
-                        <ItemsRepeater.ItemTemplate>
-                            <DataTemplate x:DataType="models:DashboardCard">
-                                <Border Style="{StaticResource DashboardCardStyle}">
-                                    <StackPanel Spacing="12">
-                                        <!-- Header Row -->
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto" />
-                                                <ColumnDefinition Width="*" />
-                                            </Grid.ColumnDefinitions>
-                                            <TextBlock Grid.Column="0"
-                                                       Text="{x:Bind Icon}"
-                                                       FontFamily="{ThemeResource SymbolThemeFontFamily}"
-                                                       FontSize="32"
-                                                       Foreground="{ThemeResource SystemAccentColor}"
-                                                       VerticalAlignment="Center"
-                                                       Margin="0,0,12,0" />
-                                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                                <TextBlock Text="{x:Bind Title}" FontWeight="SemiBold" FontSize="16" />
-                                                <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12">
-                                                    <Run Text="{x:Bind Count}" />
-                                                    <Run Text=" items" />
-                                                </TextBlock>
-                                            </StackPanel>
-                                        </Grid>
+                    <!-- Empty Results -->
+                    <Border Style="{StaticResource FluentCardStyle}" HorizontalAlignment="Center"
+                            Visibility="{x:Bind ViewModel.EmptyResultsVisibility, Mode=OneWay}">
+                        <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center" Padding="0,16">
+                            <FontIcon Glyph="&#xE930;" FontSize="18" VerticalAlignment="Center"
+                                      Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
+                            <TextBlock Text="No junk files found. Your system looks clean!"
+                                       Style="{StaticResource CaptionTextBlockStyle}"
+                                       VerticalAlignment="Center"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        </StackPanel>
+                    </Border>
 
-                                        <!-- Content Row -->
-                                        <Grid ColumnSpacing="12">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*" />
-                                                <ColumnDefinition Width="Auto" />
-                                            </Grid.ColumnDefinitions>
-                                            <StackPanel Grid.Column="0" Spacing="4">
-                                                <ProgressBar
-                                                    Value="{x:Bind Percent, Mode=OneWay}"
-                                                    IsIndeterminate="False"
-                                                    Height="6"
-                                                    CornerRadius="3" />
-                                            </StackPanel>
-                                            <TextBlock Grid.Column="1"
-                                                       Text="{x:Bind SizeFormatted}"
-                                                       FontWeight="SemiBold"
-                                                       VerticalAlignment="Center" />
-                                        </Grid>
+                    <!-- ===== Temporary Files Card ===== -->
+                    <Border Style="{StaticResource FluentCardStyle}"
+                            Visibility="{x:Bind ViewModel.TempCardVisibility, Mode=OneWay}">
+                        <StackPanel Spacing="12">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="&#xE71B;"
+                                           FontFamily="{ThemeResource SymbolThemeFontFamily}"
+                                           FontSize="24" Foreground="{ThemeResource SystemAccentColor}"
+                                           VerticalAlignment="Center" Margin="0,0,12,0" />
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                                    <TextBlock Text="Temporary Files" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                                    <TextBlock Style="{StaticResource CaptionTextBlockStyle}"
+                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}">
+                                        <Run Text="{x:Bind ViewModel.TempCount, Mode=OneWay}" FontWeight="Bold" />
+                                        <Run Text=" items · " />
+                                        <Run Text="{x:Bind ViewModel.TempSizeText, Mode=OneWay}" FontWeight="Bold" />
+                                    </TextBlock>
+                                </StackPanel>
+                                <ProgressBar Grid.Column="2" Value="{x:Bind ViewModel.TempPercent, Mode=OneWay}"
+                                             Width="90" Height="6" VerticalAlignment="Center"
+                                             CornerRadius="{ThemeResource ControlCornerRadius}"
+                                             AutomationProperties.Name="Temporary files share" />
+                                <Button Grid.Column="3" Command="{x:Bind ViewModel.ToggleTempSelectionCommand}"
+                                        Content="Select All" FontSize="12" Padding="10,5"
+                                        VerticalAlignment="Center" Margin="12,0,0,0"
+                                        ToolTipService.ToolTip="Select all temporary files"
+                                        AutomationProperties.AutomationId="SelectAllTempButton"
+                                        AutomationProperties.Name="Select all temporary files" />
+                            </Grid>
+                            <controls:Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                                <controls:Expander.Header>
+                                    <TextBlock Text="Show details" Style="{StaticResource CaptionTextBlockStyle}"
+                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                </controls:Expander.Header>
+                                <ListView ItemsSource="{x:Bind ViewModel.TempItems, Mode=OneWay}"
+                                          SelectionMode="None" MaxHeight="240">
+                                    <ListView.ItemTemplate>
+                                        <DataTemplate x:DataType="models:AnalyzerItem">
+                                            <Grid Padding="8,4" ColumnSpacing="12">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="100" />
+                                                </Grid.ColumnDefinitions>
+                                                <CheckBox Grid.Column="0" IsChecked="{x:Bind IsSelected, Mode=TwoWay}"
+                                                          VerticalAlignment="Center"
+                                                          AutomationProperties.Name="{x:Bind FileName}" />
+                                                <TextBlock Grid.Column="1" Text="{x:Bind FileName}"
+                                                           TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                                                <TextBlock Grid.Column="2" Text="{x:Bind SizeFormatted}"
+                                                           Style="{StaticResource CaptionTextBlockStyle}"
+                                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                           VerticalAlignment="Center" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ListView.ItemTemplate>
+                                </ListView>
+                            </controls:Expander>
+                        </StackPanel>
+                    </Border>
 
-                                        <!-- Expandable Details -->
-                                        <controls:Expander
-                                            IsExpanded="{x:Bind IsExpanded, Mode=TwoWay}"
-                                            HorizontalAlignment="Stretch">
-                                            <controls:Expander.Header>
-                                                <TextBlock Text="Show details" FontSize="12"
-                                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                            </controls:Expander.Header>
-                                            <ListView
-                                                ItemsSource="{x:Bind Items}"
-                                                SelectionMode="None"
-                                                MaxHeight="240">
-                                                <ListView.ItemTemplate>
-                                                    <DataTemplate x:DataType="models:AnalyzerItem">
-                                                        <Grid Padding="8,4" ColumnSpacing="12">
-                                                            <Grid.ColumnDefinitions>
-                                                                <ColumnDefinition Width="Auto" />
-                                                                <ColumnDefinition Width="*" />
-                                                                <ColumnDefinition Width="100" />
-                                                            </Grid.ColumnDefinitions>
-                                                            <CheckBox Grid.Column="0"
-                                                                      IsChecked="{x:Bind IsSelected, Mode=TwoWay}"
-                                                                      VerticalAlignment="Center" />
-                                                            <TextBlock Grid.Column="1" Text="{x:Bind FileName}"
-                                                                       TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
-                                                            <TextBlock Grid.Column="2" Text="{x:Bind SizeFormatted}"
-                                                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                                       VerticalAlignment="Center" />
-                                                        </Grid>
-                                                    </DataTemplate>
-                                                </ListView.ItemTemplate>
-                                            </ListView>
-                                        </controls:Expander>
-                                    </StackPanel>
-                                </Border>
-                            </DataTemplate>
-                        </ItemsRepeater.ItemTemplate>
-                    </ItemsRepeater>
+                    <!-- ===== Cache Files Card ===== -->
+                    <Border Style="{StaticResource FluentCardStyle}"
+                            Visibility="{x:Bind ViewModel.CacheCardVisibility, Mode=OneWay}">
+                        <StackPanel Spacing="12">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="&#xE7C1;"
+                                           FontFamily="{ThemeResource SymbolThemeFontFamily}"
+                                           FontSize="24" Foreground="{ThemeResource SystemAccentColor}"
+                                           VerticalAlignment="Center" Margin="0,0,12,0" />
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                                    <TextBlock Text="Cache Files" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                                    <TextBlock Style="{StaticResource CaptionTextBlockStyle}"
+                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}">
+                                        <Run Text="{x:Bind ViewModel.CacheCount, Mode=OneWay}" FontWeight="Bold" />
+                                        <Run Text=" items · " />
+                                        <Run Text="{x:Bind ViewModel.CacheSizeText, Mode=OneWay}" FontWeight="Bold" />
+                                    </TextBlock>
+                                </StackPanel>
+                                <ProgressBar Grid.Column="2" Value="{x:Bind ViewModel.CachePercent, Mode=OneWay}"
+                                             Width="90" Height="6" VerticalAlignment="Center"
+                                             AutomationProperties.Name="Cache files share" />
+                                <Button Grid.Column="3" Command="{x:Bind ViewModel.ToggleCacheSelectionCommand}"
+                                        Content="Select All" FontSize="12" Padding="10,5"
+                                        VerticalAlignment="Center" Margin="12,0,0,0"
+                                        ToolTipService.ToolTip="Select all cache files"
+                                        AutomationProperties.AutomationId="SelectAllCacheButton"
+                                        AutomationProperties.Name="Select all cache files" />
+                            </Grid>
+                            <controls:Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                                <controls:Expander.Header>
+                                    <TextBlock Text="Show details" Style="{StaticResource CaptionTextBlockStyle}"
+                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                </controls:Expander.Header>
+                                <ListView ItemsSource="{x:Bind ViewModel.CacheItems, Mode=OneWay}"
+                                          SelectionMode="None" MaxHeight="240">
+                                    <ListView.ItemTemplate>
+                                        <DataTemplate x:DataType="models:AnalyzerItem">
+                                            <Grid Padding="8,4" ColumnSpacing="12">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="100" />
+                                                </Grid.ColumnDefinitions>
+                                                <CheckBox Grid.Column="0" IsChecked="{x:Bind IsSelected, Mode=TwoWay}"
+                                                          VerticalAlignment="Center"
+                                                          AutomationProperties.Name="{x:Bind FileName}" />
+                                                <TextBlock Grid.Column="1" Text="{x:Bind FileName}"
+                                                           TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                                                <TextBlock Grid.Column="2" Text="{x:Bind SizeFormatted}"
+                                                           Style="{StaticResource CaptionTextBlockStyle}"
+                                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                           VerticalAlignment="Center" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ListView.ItemTemplate>
+                                </ListView>
+                            </controls:Expander>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- ===== Duplicate Files Card ===== -->
+                    <Border Style="{StaticResource FluentCardStyle}"
+                            Visibility="{x:Bind ViewModel.DuplicateCardVisibility, Mode=OneWay}">
+                        <StackPanel Spacing="12">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="&#xE8A1;"
+                                           FontFamily="{ThemeResource SymbolThemeFontFamily}"
+                                           FontSize="24" Foreground="{ThemeResource SystemAccentColor}"
+                                           VerticalAlignment="Center" Margin="0,0,12,0" />
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                                    <TextBlock Text="Duplicate Files" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                                    <TextBlock Style="{StaticResource CaptionTextBlockStyle}"
+                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}">
+                                        <Run Text="{x:Bind ViewModel.DuplicateCount, Mode=OneWay}" FontWeight="Bold" />
+                                        <Run Text=" items · " />
+                                        <Run Text="{x:Bind ViewModel.DuplicateSizeText, Mode=OneWay}" FontWeight="Bold" />
+                                    </TextBlock>
+                                </StackPanel>
+                                <ProgressBar Grid.Column="2" Value="{x:Bind ViewModel.DuplicatePercent, Mode=OneWay}"
+                                             Width="90" Height="6" VerticalAlignment="Center"
+                                             AutomationProperties.Name="Duplicate files share" />
+                                <Button Grid.Column="3" Command="{x:Bind ViewModel.ToggleDuplicateSelectionCommand}"
+                                        Content="Select All" FontSize="12" Padding="10,5"
+                                        VerticalAlignment="Center" Margin="12,0,0,0"
+                                        ToolTipService.ToolTip="Select all duplicate files"
+                                        AutomationProperties.AutomationId="SelectAllDuplicateButton"
+                                        AutomationProperties.Name="Select all duplicate files" />
+                            </Grid>
+                            <controls:Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                                <controls:Expander.Header>
+                                    <TextBlock Text="Show details" Style="{StaticResource CaptionTextBlockStyle}"
+                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                </controls:Expander.Header>
+                                <ListView ItemsSource="{x:Bind ViewModel.DuplicateItems, Mode=OneWay}"
+                                          SelectionMode="None" MaxHeight="240">
+                                    <ListView.ItemTemplate>
+                                        <DataTemplate x:DataType="models:AnalyzerItem">
+                                            <Grid Padding="8,4" ColumnSpacing="12">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="100" />
+                                                </Grid.ColumnDefinitions>
+                                                <CheckBox Grid.Column="0" IsChecked="{x:Bind IsSelected, Mode=TwoWay}"
+                                                          VerticalAlignment="Center"
+                                                          AutomationProperties.Name="{x:Bind FileName}" />
+                                                <TextBlock Grid.Column="1" Text="{x:Bind FileName}"
+                                                           TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                                                <TextBlock Grid.Column="2" Text="{x:Bind SizeFormatted}"
+                                                           Style="{StaticResource CaptionTextBlockStyle}"
+                                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                           VerticalAlignment="Center" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ListView.ItemTemplate>
+                                </ListView>
+                            </controls:Expander>
+                        </StackPanel>
+                    </Border>
 
                 </StackPanel>
 

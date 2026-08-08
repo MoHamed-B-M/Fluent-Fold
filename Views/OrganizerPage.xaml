@@ -21,6 +21,7 @@
                     <InfoBar.ActionButton>
                         <Button Content="&#xE74D;" FontFamily="{ThemeResource SymbolThemeFontFamily}"
                                 FontSize="16" Click="OnCleanupActionClick"
+                                AutomationProperties.Name="Review and delete"
                                 ToolTipService.ToolTip="Review &amp; Delete" />
                     </InfoBar.ActionButton>
                 </InfoBar>
@@ -33,7 +34,7 @@
                     IsClosable="True" />
 
                 <!-- ====== STANDARD MODE ====== -->
-                <StackPanel x:Name="StandardLayout" x:Load="{x:Bind ViewModel.IsStandardMode, Mode=OneWay}" Spacing="20">
+                <StackPanel x:Name="StandardLayout" Visibility="{x:Bind ViewModel.StandardVisibility, Mode=OneWay}" Spacing="20">
 
                     <Border Style="{StaticResource HeroCardStyle}">
                         <StackPanel Spacing="20" HorizontalAlignment="Center">
@@ -41,16 +42,18 @@
                                        FontSize="56" HorizontalAlignment="Center"
                                        Foreground="{ThemeResource SystemAccentColor}" />
                             <StackPanel Spacing="4" HorizontalAlignment="Center">
-                                <TextBlock Text="FluentFold" FontSize="28" FontWeight="Bold" HorizontalAlignment="Center" />
-                                <TextBlock Text="Organize your files in seconds" FontSize="14"
+                                <TextBlock Text="FluentFold" Style="{StaticResource TitleTextBlockStyle}" HorizontalAlignment="Center" />
+                                <TextBlock Text="Organize your files in seconds" Style="{StaticResource BodyTextBlockStyle}"
                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
                             </StackPanel>
                             <Button x:Name="StandardSelectFolderButton" Command="{x:Bind ViewModel.PickFolderCommand}" HorizontalAlignment="Center"
                                     PointerEntered="Button_PointerEntered" PointerExited="Button_PointerExited"
                                     PointerPressed="Button_PointerPressed" PointerReleased="Button_PointerReleased"
                                     ToolTipService.ToolTip="Select a folder"
-                                    Background="{ThemeResource SystemAccentColor}" Foreground="White"
-                                    BorderThickness="0" CornerRadius="12" Padding="20,12">
+                                    AutomationProperties.AutomationId="StandardSelectFolderButton"
+                                    AutomationProperties.Name="Select a folder"
+                                    Background="{ThemeResource SystemAccentColor}" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
+                                    BorderThickness="0" CornerRadius="{ThemeResource ControlCornerRadiusLarge}" Padding="20,12">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                     <FontIcon Glyph="&#xE838;" FontSize="18" />
                                     <TextBlock Text="Select Folder" VerticalAlignment="Center" FontSize="14" />
@@ -62,25 +65,36 @@
                                        TextTrimming="CharacterEllipsis" HorizontalAlignment="Center" FontSize="13" />
                             <StackPanel x:Name="FolderSelectedState" Visibility="{x:Bind ViewModel.FolderSelectedVisibility, Mode=OneWay}"
                                         HorizontalAlignment="Stretch">
-                                <Button x:Name="HeroOrganizeButton"
-                                        Command="{x:Bind ViewModel.OrganizeCommand}"
-                                        IsEnabled="{x:Bind ViewModel.CanOrganize, Mode=OneWay}"
-                                        PointerEntered="Button_PointerEntered" PointerExited="Button_PointerExited"
-                                        PointerPressed="Button_PointerPressed" PointerReleased="Button_PointerReleased"
-                                        ToolTipService.ToolTip="Start Organizing"
-                                        Background="{ThemeResource SystemAccentColor}" Foreground="White"
-                                        BorderThickness="0" CornerRadius="12" Padding="24,14"
-                                        HorizontalAlignment="Center">
+<Button x:Name="HeroOrganizeButton"
+                                    Command="{x:Bind ViewModel.OrganizeCommand}"
+                                    IsEnabled="{x:Bind ViewModel.CanOrganize, Mode=OneWay}"
+                                    PointerEntered="Button_PointerEntered" PointerExited="Button_PointerExited"
+                                    PointerPressed="Button_PointerPressed" PointerReleased="Button_PointerReleased"
+                                    ToolTipService.ToolTip="Start Organizing"
+                                    AutomationProperties.AutomationId="HeroOrganizeButton"
+                                    AutomationProperties.Name="Organize Files"
+                                    Background="{ThemeResource SystemAccentColor}" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
+                                    BorderThickness="0" CornerRadius="{ThemeResource ControlCornerRadiusLarge}" Padding="24,14"
+                                    HorizontalAlignment="Center">
                                     <StackPanel Orientation="Horizontal" Spacing="10">
                                         <FontIcon Glyph="&#xE768;" FontSize="22" />
                                         <StackPanel VerticalAlignment="Center">
-                                            <TextBlock Text="Organize Files" FontSize="16" FontWeight="SemiBold" />
+                                            <TextBlock Text="Organize Files" Style="{StaticResource BodyStrongTextBlockStyle}"
+                                                       Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
                                             <TextBlock Text="{x:Bind ViewModel.SelectedFolderPath, Mode=OneWay}"
-                                                       FontSize="11" Foreground="White" Opacity="0.7" TextTrimming="CharacterEllipsis"
+                                                       Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" Opacity="0.7" TextTrimming="CharacterEllipsis"
                                                        MaxWidth="300" />
                                         </StackPanel>
                                     </StackPanel>
                                 </Button>
+                            </StackPanel>
+                            <StackPanel x:Name="EmptyFolderState" Orientation="Horizontal" Spacing="8"
+                                        HorizontalAlignment="Center"
+                                        Visibility="{x:Bind ViewModel.EmptyFolderVisibility, Mode=OneWay}">
+                                <FontIcon Glyph="&#xE8A5;" FontSize="14"
+                                          Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                <TextBlock Text="No files found in this folder." Style="{StaticResource CaptionTextBlockStyle}"
+                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="10"
                                         Visibility="{x:Bind ViewModel.FolderSelectedVisibility, Mode=OneWay}">
@@ -88,7 +102,10 @@
                                         IsEnabled="{x:Bind ViewModel.CanUndo, Mode=OneWay}"
                                         PointerEntered="Button_PointerEntered" PointerExited="Button_PointerExited"
                                         PointerPressed="Button_PointerPressed" PointerReleased="Button_PointerReleased"
-                                        ToolTipService.ToolTip="Undo" CornerRadius="8" Padding="14,8">
+                                        ToolTipService.ToolTip="Undo"
+                                        AutomationProperties.AutomationId="StandardUndoButton"
+                                        AutomationProperties.Name="Undo last operation"
+                                        CornerRadius="{ThemeResource ControlCornerRadius}" Padding="14,8">
                                     <StackPanel Orientation="Horizontal" Spacing="6">
                                         <FontIcon Glyph="&#xE7A7;" FontSize="14" />
                                         <TextBlock Text="Undo" FontSize="13" />
@@ -98,7 +115,10 @@
                                         IsEnabled="{x:Bind ViewModel.CanUndo, Mode=OneWay}"
                                         PointerEntered="Button_PointerEntered" PointerExited="Button_PointerExited"
                                         PointerPressed="Button_PointerPressed" PointerReleased="Button_PointerReleased"
-                                        ToolTipService.ToolTip="Restore All" CornerRadius="8" Padding="14,8">
+                                        ToolTipService.ToolTip="Restore All"
+                                        AutomationProperties.AutomationId="StandardRestoreAllButton"
+                                        AutomationProperties.Name="Restore all files"
+                                        CornerRadius="{ThemeResource ControlCornerRadius}" Padding="14,8">
                                     <StackPanel Orientation="Horizontal" Spacing="6">
                                         <FontIcon Glyph="&#xE777;" FontSize="14" />
                                         <TextBlock Text="Restore" FontSize="13" />
@@ -127,63 +147,63 @@
                             <StackPanel HorizontalAlignment="Center" Spacing="2" MinWidth="64">
                                 <FontIcon Glyph="&#xE722;" FontSize="22" HorizontalAlignment="Center"
                                           Foreground="{ThemeResource SystemAccentColor}" />
-                                <TextBlock Text="{x:Bind ViewModel.ImageCount, Mode=OneWay}" FontWeight="Bold" HorizontalAlignment="Center" FontSize="15" />
-                                <TextBlock Text="Images" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                                <TextBlock Text="{x:Bind ViewModel.ImageCount, Mode=OneWay}" Style="{StaticResource BodyStrongTextBlockStyle}" HorizontalAlignment="Center" />
+                                <TextBlock Text="Images" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
                             </StackPanel>
                         </Border>
                         <Border Style="{StaticResource StatCardStyle}">
                             <StackPanel HorizontalAlignment="Center" Spacing="2" MinWidth="64">
                                 <FontIcon Glyph="&#xE8A5;" FontSize="22" HorizontalAlignment="Center"
                                           Foreground="{ThemeResource SystemAccentColor}" />
-                                <TextBlock Text="{x:Bind ViewModel.DocumentCount, Mode=OneWay}" FontWeight="Bold" HorizontalAlignment="Center" FontSize="15" />
-                                <TextBlock Text="Documents" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                                <TextBlock Text="{x:Bind ViewModel.DocumentCount, Mode=OneWay}" Style="{StaticResource BodyStrongTextBlockStyle}" HorizontalAlignment="Center" />
+                                <TextBlock Text="Documents" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
                             </StackPanel>
                         </Border>
                         <Border Style="{StaticResource StatCardStyle}">
                             <StackPanel HorizontalAlignment="Center" Spacing="2" MinWidth="64">
                                 <FontIcon Glyph="&#xE714;" FontSize="22" HorizontalAlignment="Center"
                                           Foreground="{ThemeResource SystemAccentColor}" />
-                                <TextBlock Text="{x:Bind ViewModel.VideoCount, Mode=OneWay}" FontWeight="Bold" HorizontalAlignment="Center" FontSize="15" />
-                                <TextBlock Text="Videos" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                                <TextBlock Text="{x:Bind ViewModel.VideoCount, Mode=OneWay}" Style="{StaticResource BodyStrongTextBlockStyle}" HorizontalAlignment="Center" />
+                                <TextBlock Text="Videos" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
                             </StackPanel>
                         </Border>
                         <Border Style="{StaticResource StatCardStyle}">
                             <StackPanel HorizontalAlignment="Center" Spacing="2" MinWidth="64">
                                 <FontIcon Glyph="&#xE8D6;" FontSize="22" HorizontalAlignment="Center"
                                           Foreground="{ThemeResource SystemAccentColor}" />
-                                <TextBlock Text="{x:Bind ViewModel.AudioCount, Mode=OneWay}" FontWeight="Bold" HorizontalAlignment="Center" FontSize="15" />
-                                <TextBlock Text="Audio" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                                <TextBlock Text="{x:Bind ViewModel.AudioCount, Mode=OneWay}" Style="{StaticResource BodyStrongTextBlockStyle}" HorizontalAlignment="Center" />
+                                <TextBlock Text="Audio" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
                             </StackPanel>
                         </Border>
                         <Border Style="{StaticResource StatCardStyle}">
                             <StackPanel HorizontalAlignment="Center" Spacing="2" MinWidth="64">
                                 <FontIcon Glyph="&#xE773;" FontSize="22" HorizontalAlignment="Center"
                                           Foreground="{ThemeResource SystemAccentColor}" />
-                                <TextBlock Text="{x:Bind ViewModel.ArchiveCount, Mode=OneWay}" FontWeight="Bold" HorizontalAlignment="Center" FontSize="15" />
-                                <TextBlock Text="Archives" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                                <TextBlock Text="{x:Bind ViewModel.ArchiveCount, Mode=OneWay}" Style="{StaticResource BodyStrongTextBlockStyle}" HorizontalAlignment="Center" />
+                                <TextBlock Text="Archives" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
                             </StackPanel>
                         </Border>
                         <Border Style="{StaticResource StatCardStyle}">
                             <StackPanel HorizontalAlignment="Center" Spacing="2" MinWidth="64">
                                 <FontIcon Glyph="&#xE943;" FontSize="22" HorizontalAlignment="Center"
                                           Foreground="{ThemeResource SystemAccentColor}" />
-                                <TextBlock Text="{x:Bind ViewModel.CodeCount, Mode=OneWay}" FontWeight="Bold" HorizontalAlignment="Center" FontSize="15" />
-                                <TextBlock Text="Code" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                                <TextBlock Text="{x:Bind ViewModel.CodeCount, Mode=OneWay}" Style="{StaticResource BodyStrongTextBlockStyle}" HorizontalAlignment="Center" />
+                                <TextBlock Text="Code" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
                             </StackPanel>
                         </Border>
                         <Border Style="{StaticResource StatCardStyle}">
                             <StackPanel HorizontalAlignment="Center" Spacing="2" MinWidth="64">
                                 <FontIcon Glyph="&#xE771;" FontSize="22" HorizontalAlignment="Center"
                                           Foreground="{ThemeResource SystemAccentColor}" />
-                                <TextBlock Text="{x:Bind ViewModel.OtherCount, Mode=OneWay}" FontWeight="Bold" HorizontalAlignment="Center" FontSize="15" />
-                                <TextBlock Text="Other" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                                <TextBlock Text="{x:Bind ViewModel.OtherCount, Mode=OneWay}" Style="{StaticResource BodyStrongTextBlockStyle}" HorizontalAlignment="Center" />
+                                <TextBlock Text="Other" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
                             </StackPanel>
                         </Border>
                     </ItemsControl>
                 </StackPanel>
 
                 <!-- ====== PRO MODE ====== -->
-                <StackPanel x:Name="ProLayout" x:Load="{x:Bind ViewModel.IsProMode, Mode=OneWay}" Spacing="20">
+                <StackPanel x:Name="ProLayout" Visibility="{x:Bind ViewModel.ProVisibility, Mode=OneWay}" Spacing="20">
 
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -204,8 +224,10 @@
                                         PointerEntered="Button_PointerEntered" PointerExited="Button_PointerExited"
                                         PointerPressed="Button_PointerPressed" PointerReleased="Button_PointerReleased"
                                         ToolTipService.ToolTip="Select Folder"
-                                        Background="{ThemeResource SystemAccentColor}" Foreground="White"
-                                        BorderThickness="0" CornerRadius="10">
+                                        AutomationProperties.AutomationId="ProSelectFolderButton"
+                                        AutomationProperties.Name="Select folder"
+                                        Background="{ThemeResource SystemAccentColor}" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
+                                        BorderThickness="0" CornerRadius="{ThemeResource ControlCornerRadius}">
                                     <StackPanel Orientation="Horizontal" Spacing="6">
                                         <FontIcon Glyph="&#xE838;" FontSize="16" />
                                         <TextBlock Text="Select Folder" VerticalAlignment="Center" FontSize="13" />
@@ -221,8 +243,10 @@
                                         PointerEntered="Button_PointerEntered" PointerExited="Button_PointerExited"
                                         PointerPressed="Button_PointerPressed" PointerReleased="Button_PointerReleased"
                                         ToolTipService.ToolTip="Organize Files"
-                                        Background="{ThemeResource SystemAccentColor}" Foreground="White"
-                                        BorderThickness="0" CornerRadius="10">
+                                        AutomationProperties.AutomationId="ProOrganizeButton"
+                                        AutomationProperties.Name="Organize files"
+                                        Background="{ThemeResource SystemAccentColor}" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
+                                        BorderThickness="0" CornerRadius="{ThemeResource ControlCornerRadius}">
                                     <StackPanel Orientation="Horizontal" Spacing="6">
                                         <FontIcon Glyph="&#xE768;" FontSize="16" />
                                         <TextBlock Text="Organize" VerticalAlignment="Center" FontSize="13" />
@@ -233,7 +257,9 @@
                                         PointerEntered="Button_PointerEntered" PointerExited="Button_PointerExited"
                                         PointerPressed="Button_PointerPressed" PointerReleased="Button_PointerReleased"
                                         ToolTipService.ToolTip="Undo"
-                                        CornerRadius="10">
+                                        AutomationProperties.AutomationId="ProUndoButton"
+                                        AutomationProperties.Name="Undo last operation"
+                                        CornerRadius="{ThemeResource ControlCornerRadius}">
                                     <StackPanel Orientation="Horizontal" Spacing="6">
                                         <FontIcon Glyph="&#xE7A7;" FontSize="16" />
                                         <TextBlock Text="Undo" VerticalAlignment="Center" FontSize="13" />
@@ -244,7 +270,9 @@
                                         PointerEntered="Button_PointerEntered" PointerExited="Button_PointerExited"
                                         PointerPressed="Button_PointerPressed" PointerReleased="Button_PointerReleased"
                                         ToolTipService.ToolTip="Restore All"
-                                        CornerRadius="10">
+                                        AutomationProperties.AutomationId="ProRestoreAllButton"
+                                        AutomationProperties.Name="Restore all files"
+                                        CornerRadius="{ThemeResource ControlCornerRadius}">
                                     <StackPanel Orientation="Horizontal" Spacing="6">
                                         <FontIcon Glyph="&#xE777;" FontSize="16" />
                                         <TextBlock Text="Restore" VerticalAlignment="Center" FontSize="13" />
@@ -264,7 +292,7 @@
 
                     <Border Style="{StaticResource FluentCardStyle}" Padding="20">
                         <StackPanel Spacing="12">
-                            <TextBlock Text="Statistics" FontWeight="SemiBold" FontSize="16" />
+                            <TextBlock Text="Statistics" Style="{StaticResource BodyStrongTextBlockStyle}" />
                             <Grid ColumnSpacing="8" RowSpacing="8">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
@@ -280,56 +308,56 @@
                                     <StackPanel Spacing="2" HorizontalAlignment="Center">
                                         <FontIcon Glyph="&#xE722;" FontSize="20" HorizontalAlignment="Center"
                                                   Foreground="{ThemeResource SystemAccentColor}" />
-                                        <TextBlock Text="{x:Bind ViewModel.ImageCount, Mode=OneWay}" FontSize="22" FontWeight="Bold" HorizontalAlignment="Center" />
-                                        <TextBlock Text="Images" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                                        <TextBlock Text="{x:Bind ViewModel.ImageCount, Mode=OneWay}" Style="{StaticResource BodyStrongTextBlockStyle}" HorizontalAlignment="Center" />
+                                        <TextBlock Text="Images" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
                                     </StackPanel>
                                 </Border>
                                 <Border Grid.Column="1" Grid.Row="0" Style="{StaticResource StatCardStyle}">
                                     <StackPanel Spacing="2" HorizontalAlignment="Center">
                                         <FontIcon Glyph="&#xE8A5;" FontSize="20" HorizontalAlignment="Center"
                                                   Foreground="{ThemeResource SystemAccentColor}" />
-                                        <TextBlock Text="{x:Bind ViewModel.DocumentCount, Mode=OneWay}" FontSize="22" FontWeight="Bold" HorizontalAlignment="Center" />
-                                        <TextBlock Text="Documents" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                                        <TextBlock Text="{x:Bind ViewModel.DocumentCount, Mode=OneWay}" Style="{StaticResource BodyStrongTextBlockStyle}" HorizontalAlignment="Center" />
+                                        <TextBlock Text="Documents" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
                                     </StackPanel>
                                 </Border>
                                 <Border Grid.Column="2" Grid.Row="0" Style="{StaticResource StatCardStyle}">
                                     <StackPanel Spacing="2" HorizontalAlignment="Center">
                                         <FontIcon Glyph="&#xE714;" FontSize="20" HorizontalAlignment="Center"
                                                   Foreground="{ThemeResource SystemAccentColor}" />
-                                        <TextBlock Text="{x:Bind ViewModel.VideoCount, Mode=OneWay}" FontSize="22" FontWeight="Bold" HorizontalAlignment="Center" />
-                                        <TextBlock Text="Videos" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                                        <TextBlock Text="{x:Bind ViewModel.VideoCount, Mode=OneWay}" Style="{StaticResource BodyStrongTextBlockStyle}" HorizontalAlignment="Center" />
+                                        <TextBlock Text="Videos" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
                                     </StackPanel>
                                 </Border>
                                 <Border Grid.Column="3" Grid.Row="0" Style="{StaticResource StatCardStyle}">
                                     <StackPanel Spacing="2" HorizontalAlignment="Center">
                                         <FontIcon Glyph="&#xE8D6;" FontSize="20" HorizontalAlignment="Center"
                                                   Foreground="{ThemeResource SystemAccentColor}" />
-                                        <TextBlock Text="{x:Bind ViewModel.AudioCount, Mode=OneWay}" FontSize="22" FontWeight="Bold" HorizontalAlignment="Center" />
-                                        <TextBlock Text="Audio" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                                        <TextBlock Text="{x:Bind ViewModel.AudioCount, Mode=OneWay}" Style="{StaticResource BodyStrongTextBlockStyle}" HorizontalAlignment="Center" />
+                                        <TextBlock Text="Audio" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
                                     </StackPanel>
                                 </Border>
                                 <Border Grid.Column="0" Grid.Row="1" Style="{StaticResource StatCardStyle}">
                                     <StackPanel Spacing="2" HorizontalAlignment="Center">
                                         <FontIcon Glyph="&#xE773;" FontSize="20" HorizontalAlignment="Center"
                                                   Foreground="{ThemeResource SystemAccentColor}" />
-                                        <TextBlock Text="{x:Bind ViewModel.ArchiveCount, Mode=OneWay}" FontSize="22" FontWeight="Bold" HorizontalAlignment="Center" />
-                                        <TextBlock Text="Archives" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                                        <TextBlock Text="{x:Bind ViewModel.ArchiveCount, Mode=OneWay}" Style="{StaticResource BodyStrongTextBlockStyle}" HorizontalAlignment="Center" />
+                                        <TextBlock Text="Archives" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
                                     </StackPanel>
                                 </Border>
                                 <Border Grid.Column="1" Grid.Row="1" Style="{StaticResource StatCardStyle}">
                                     <StackPanel Spacing="2" HorizontalAlignment="Center">
                                         <FontIcon Glyph="&#xE943;" FontSize="20" HorizontalAlignment="Center"
                                                   Foreground="{ThemeResource SystemAccentColor}" />
-                                        <TextBlock Text="{x:Bind ViewModel.CodeCount, Mode=OneWay}" FontSize="22" FontWeight="Bold" HorizontalAlignment="Center" />
-                                        <TextBlock Text="Code" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                                        <TextBlock Text="{x:Bind ViewModel.CodeCount, Mode=OneWay}" Style="{StaticResource BodyStrongTextBlockStyle}" HorizontalAlignment="Center" />
+                                        <TextBlock Text="Code" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
                                     </StackPanel>
                                 </Border>
                                 <Border Grid.Column="2" Grid.Row="1" Style="{StaticResource StatCardStyle}">
                                     <StackPanel Spacing="2" HorizontalAlignment="Center">
                                         <FontIcon Glyph="&#xE771;" FontSize="20" HorizontalAlignment="Center"
                                                   Foreground="{ThemeResource SystemAccentColor}" />
-                                        <TextBlock Text="{x:Bind ViewModel.OtherCount, Mode=OneWay}" FontSize="22" FontWeight="Bold" HorizontalAlignment="Center" />
-                                        <TextBlock Text="Other" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                                        <TextBlock Text="{x:Bind ViewModel.OtherCount, Mode=OneWay}" Style="{StaticResource BodyStrongTextBlockStyle}" HorizontalAlignment="Center" />
+                                        <TextBlock Text="Other" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
                                     </StackPanel>
                                 </Border>
                             </Grid>
@@ -338,11 +366,11 @@
 
                     <Border Style="{StaticResource FluentCardStyle}" Padding="20">
                         <StackPanel Spacing="16">
-                            <TextBlock Text="Control Panel" FontWeight="SemiBold" FontSize="16" />
+                            <TextBlock Text="Control Panel" Style="{StaticResource BodyStrongTextBlockStyle}" />
 
-                            <Border Background="{ThemeResource CardBackgroundFillColorSecondary}" CornerRadius="8" Padding="14">
+                            <Border Background="{ThemeResource CardBackgroundFillColorSecondary}" CornerRadius="{ThemeResource ControlCornerRadius}" Padding="14">
                                 <StackPanel Spacing="10">
-                                    <TextBlock Text="&#xE943; Custom Rules" FontWeight="SemiBold" FontSize="14" />
+                                    <TextBlock Text="&#xE943; Custom Rules" Style="{StaticResource BodyStrongTextBlockStyle}" />
                                     <Grid ColumnSpacing="8">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="100" />
@@ -351,14 +379,18 @@
                                         </Grid.ColumnDefinitions>
                                         <TextBox Grid.Column="0"
                                                  Text="{x:Bind ViewModel.NewRuleExtension, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                 Header="Extension"
                                                  PlaceholderText=".pdf" />
                                         <TextBox Grid.Column="1"
                                                  Text="{x:Bind ViewModel.NewRuleCategoryName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                 Header="Category"
                                                  PlaceholderText="Category name" />
                                         <Button Grid.Column="2" Command="{x:Bind ViewModel.AddCustomRuleCommand}"
                                                 Content="&#xE109;" FontFamily="{ThemeResource SymbolThemeFontFamily}" FontSize="12"
-                                                Width="32" Height="32"
-                                                ToolTipService.ToolTip="Add Rule" />
+                                                Width="32" Height="32" VerticalAlignment="Bottom"
+                                                ToolTipService.ToolTip="Add Rule"
+                                                AutomationProperties.AutomationId="AddCustomRuleButton"
+                                                AutomationProperties.Name="Add custom rule" />
                                     </Grid>
                                     <ListView ItemsSource="{x:Bind ViewModel.CustomRules, Mode=OneWay}" MaxHeight="140">
                                         <ListView.ItemTemplate>
@@ -372,6 +404,7 @@
                                                     <TextBlock Grid.Column="0" Text="{x:Bind Extension}" FontFamily="Consolas" />
                                                     <TextBlock Grid.Column="1" Text="{x:Bind CategoryName}" />
                                                     <Button Grid.Column="2" Content="✕" FontSize="11" Width="28" Height="28"
+                                                            AutomationProperties.Name="Remove rule"
                                                             Click="OnRemoveRuleClick" />
                                                 </Grid>
                                             </DataTemplate>
@@ -379,13 +412,14 @@
                                     </ListView>
                                     <TextBox Text="{x:Bind ViewModel.FolderNamingPattern, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                              PlaceholderText="Folder pattern: {category}, {YYYY}-{MM}_{category}, etc."
-                                             Header="Folder Naming Pattern" />
+                                             Header="Folder Naming Pattern"
+                                             AutomationProperties.AutomationId="FolderNamingPatternTextBox" />
                                 </StackPanel>
                             </Border>
 
-                            <Border Background="{ThemeResource CardBackgroundFillColorSecondary}" CornerRadius="8" Padding="14">
+                            <Border Background="{ThemeResource CardBackgroundFillColorSecondary}" CornerRadius="{ThemeResource ControlCornerRadius}" Padding="14">
                                 <StackPanel Spacing="10">
-                                    <TextBlock Text="&#xE943; Trigger Rules" FontWeight="SemiBold" FontSize="14" />
+                                    <TextBlock Text="&#xE943; Trigger Rules" Style="{StaticResource BodyStrongTextBlockStyle}" />
                                     <Grid ColumnSpacing="8">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="100" />
@@ -393,6 +427,7 @@
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
                                         <ComboBox Grid.Column="0" SelectedIndex="{x:Bind ViewModel.NewTriggerTypeIndex, Mode=TwoWay}"
+                                                  Header="Match"
                                                   HorizontalAlignment="Stretch">
                                             <x:String>Contains</x:String>
                                             <x:String>Starts With</x:String>
@@ -401,15 +436,20 @@
                                         </ComboBox>
                                         <TextBox Grid.Column="1"
                                                  Text="{x:Bind ViewModel.NewTriggerValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                 Header="Trigger value"
                                                  PlaceholderText="Trigger value" />
                                         <TextBox Grid.Column="2" Width="100"
                                                  Text="{x:Bind ViewModel.NewTriggerCategoryName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                 Header="Category"
                                                  PlaceholderText="Category" />
                                     </Grid>
                                     <Button Command="{x:Bind ViewModel.AddTriggerRuleCommand}"
                                             Content="&#xE109;" FontFamily="{ThemeResource SymbolThemeFontFamily}" FontSize="12"
-                                            Width="32" Height="32" ToolTipService.ToolTip="Add Trigger Rule" />
-                                    <ListView ItemsSource="{x:Bind ViewModel.RuleModels, Mode=OneWay}" MaxHeight="140">
+                                            Width="32" Height="32" ToolTipService.ToolTip="Add Trigger Rule"
+                                            HorizontalAlignment="Left"
+                                            AutomationProperties.AutomationId="AddTriggerRuleButton"
+                                            AutomationProperties.Name="Add trigger rule" />
+                                    <ListView ItemsSource="{x:Bind ViewModel.RuleModels, Mode=OneWay}" MaxHeight="120">
                                         <ListView.ItemTemplate>
                                             <DataTemplate x:DataType="models:RuleModel">
                                                 <Grid ColumnSpacing="8">
@@ -418,11 +458,12 @@
                                                         <ColumnDefinition Width="*" />
                                                         <ColumnDefinition Width="Auto" />
                                                     </Grid.ColumnDefinitions>
-                                                    <TextBlock Grid.Column="0" Text="{x:Bind TriggerType}" FontSize="12" />
+                                                    <TextBlock Grid.Column="0" Text="{x:Bind TriggerType}" Style="{StaticResource CaptionTextBlockStyle}" />
                                                     <TextBlock Grid.Column="1" Text="{x:Bind TriggerValue}" TextTrimming="CharacterEllipsis" />
                                                     <TextBlock Grid.Column="1" Text="→" HorizontalAlignment="Center" />
                                                     <TextBlock Grid.Column="1" Text="{x:Bind TargetCategory}" />
                                                     <Button Grid.Column="2" Content="✕" FontSize="11" Width="28" Height="28"
+                                                            AutomationProperties.Name="Remove trigger rule"
                                                             Click="OnRemoveTriggerRuleClick" />
                                                 </Grid>
                                             </DataTemplate>
@@ -431,29 +472,34 @@
                                 </StackPanel>
                             </Border>
 
-                            <Border Background="{ThemeResource CardBackgroundFillColorSecondary}" CornerRadius="8" Padding="14">
+                            <Border Background="{ThemeResource CardBackgroundFillColorSecondary}" CornerRadius="{ThemeResource ControlCornerRadius}" Padding="14">
                                 <StackPanel Spacing="10">
-                                    <TextBlock Text="&#xE8AC; Rename Files" FontWeight="SemiBold" FontSize="14" />
+                                    <TextBlock Text="&#xE8AC; Rename Files" Style="{StaticResource BodyStrongTextBlockStyle}" />
                                     <Grid ColumnSpacing="8">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="70" />
-                                            <ColumnDefinition Width="70" />
+                                            <ColumnDefinition Width="100" />
+                                            <ColumnDefinition Width="100" />
                                         </Grid.ColumnDefinitions>
                                         <TextBox Grid.Column="0"
                                                  Text="{x:Bind ViewModel.RenamePattern, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                 Header="Pattern"
                                                  PlaceholderText="Pattern: {name}_{n}{ext}" />
-                                        <TextBox Grid.Column="1"
-                                                 Text="{x:Bind ViewModel.RenameStartNumber, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                 PlaceholderText="Start" />
-                                        <TextBox Grid.Column="2"
-                                                 Text="{x:Bind ViewModel.RenamePadding, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                 PlaceholderText="Pad" />
+                                        <NumberBox Grid.Column="1"
+                                                   Value="{x:Bind ViewModel.RenameStartNumber, Mode=TwoWay}"
+                                                   Header="Start" Minimum="1" Maximum="999999"
+                                                   SpinButtonPlacementMode="Compact" SmallChange="1" />
+                                        <NumberBox Grid.Column="2"
+                                                   Value="{x:Bind ViewModel.RenamePadding, Mode=TwoWay}"
+                                                   Header="Pad" Minimum="1" Maximum="9"
+                                                   SpinButtonPlacementMode="Compact" AutomationProperties.Name="Digit padding" />
                                     </Grid>
                                     <Button Command="{x:Bind ViewModel.RenameCommand}"
                                             IsEnabled="{x:Bind ViewModel.CanOrganize, Mode=OneWay}"
                                             Width="36" Height="36"
-                                            ToolTipService.ToolTip="Apply Rename">
+                                            ToolTipService.ToolTip="Apply Rename"
+                                            AutomationProperties.AutomationId="ApplyRenameButton"
+                                            AutomationProperties.Name="Apply rename">
                                         <TextBlock Text="&#xE8AC;" FontFamily="{ThemeResource SymbolThemeFontFamily}" FontSize="14" />
                                     </Button>
                                 </StackPanel>
@@ -469,23 +515,37 @@
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0" Text="Files" FontWeight="SemiBold" FontSize="16" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="0" Text="Files" Style="{StaticResource BodyStrongTextBlockStyle}" VerticalAlignment="Center" />
                                 <ComboBox Grid.Column="1"
                                           ItemsSource="{x:Bind ViewModel.SortModes}"
                                           SelectedItem="{x:Bind ViewModel.SortMode, Mode=TwoWay}"
                                           HorizontalAlignment="Right" VerticalAlignment="Center"
-                                          Width="140" Margin="0,0,8,0" />
+                                          Width="140" Margin="0,0,8,0"
+                                          AutomationProperties.AutomationId="FilesSortComboBox" />
                                 <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
                                     <Button Command="{x:Bind ViewModel.SetListViewCommand}" Content="&#xE992;"
                                             PointerEntered="Button_PointerEntered" PointerExited="Button_PointerExited"
                                             PointerPressed="Button_PointerPressed" PointerReleased="Button_PointerReleased"
-                                            Width="32" Height="32" />
+                                            Width="32" Height="32"
+                                            AutomationProperties.AutomationId="ListViewToggleButton"
+                                            AutomationProperties.Name="List view" />
                                     <Button Command="{x:Bind ViewModel.SetGridViewCommand}" Content="&#xE8A9;"
                                             PointerEntered="Button_PointerEntered" PointerExited="Button_PointerExited"
                                             PointerPressed="Button_PointerPressed" PointerReleased="Button_PointerReleased"
-                                            Width="32" Height="32" />
+                                            Width="32" Height="32"
+                                            AutomationProperties.AutomationId="GridViewToggleButton"
+                                            AutomationProperties.Name="Grid view" />
                                 </StackPanel>
                             </Grid>
+
+                            <StackPanel x:Name="ProEmptyFolderState" Orientation="Horizontal" Spacing="8"
+                                        HorizontalAlignment="Center" Margin="0,12"
+                                        Visibility="{x:Bind ViewModel.EmptyFolderVisibility, Mode=OneWay}">
+                                <FontIcon Glyph="&#xE8A5;" FontSize="14"
+                                          Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                <TextBlock Text="No files found in this folder." Style="{StaticResource CaptionTextBlockStyle}"
+                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            </StackPanel>
 
                             <ListView x:Name="FileListView"
                                       ItemsSource="{x:Bind ViewModel.Files, Mode=OneWay}"
@@ -549,7 +609,7 @@
         </ScrollViewer>
 
         <Grid Visibility="{x:Bind ViewModel.WorkingVisibility, Mode=OneWay}"
-              Background="#80000000" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+              Background="{ThemeResource ScrimFillBrush}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
             <Border Background="{ThemeResource CardBackgroundFillColorDefault}" CornerRadius="14" Padding="28,20"
                     HorizontalAlignment="Center" VerticalAlignment="Center">
                 <StackPanel Spacing="14" HorizontalAlignment="Center" MinWidth="260">
@@ -560,6 +620,8 @@
                     <Button Command="{x:Bind ViewModel.CancelOperationCommand}"
                             Content="&#xE10A;" FontFamily="{ThemeResource SymbolThemeFontFamily}"
                             HorizontalAlignment="Center" Width="36" Height="36"
+                            AutomationProperties.AutomationId="CancelOperationButton"
+                            AutomationProperties.Name="Cancel operation"
                             ToolTipService.ToolTip="Cancel" />
                 </StackPanel>
             </Border>
@@ -567,28 +629,28 @@
 
         <!-- ===== TEACHING TIPS ===== -->
         <TeachingTip x:Name="StandardSelectFolderTip"
-                     Target="StandardSelectFolderButton"
+                     Target="{x:Bind StandardSelectFolderButton}"
                      Title="Select a Folder"
                      Subtitle="Pick any folder on your PC and FluentFold will categorize its files into Images, Documents, Videos, and more."
-                     Placement="Bottom"
+                     PreferredPlacement="Bottom"
                      IsLightDismissEnabled="True" />
         <TeachingTip x:Name="HeroOrganizeTip"
-                     Target="HeroOrganizeButton"
+                     Target="{x:Bind HeroOrganizeButton}"
                      Title="Organize Files"
                      Subtitle="This will sort all files into categorized folders with one click. You can undo anytime."
-                     Placement="Bottom"
+                     PreferredPlacement="Bottom"
                      IsLightDismissEnabled="True" />
         <TeachingTip x:Name="ProSelectFolderTip"
-                     Target="ProSelectFolderButton"
+                     Target="{x:Bind ProSelectFolderButton}"
                      Title="Select a Folder"
                      Subtitle="Pick any folder to analyze and organize. Pro mode gives you custom rules and renaming."
-                     Placement="Bottom"
+                     PreferredPlacement="Bottom"
                      IsLightDismissEnabled="True" />
         <TeachingTip x:Name="ProOrganizeTip"
-                     Target="OrganizeButton"
+                     Target="{x:Bind OrganizeButton}"
                      Title="Organize Files"
                      Subtitle="Sorts files into categorized folders. You can customize rules in the Control Panel below."
-                     Placement="Bottom"
+                     PreferredPlacement="Bottom"
                      IsLightDismissEnabled="True" />
     </Grid>
 </Page>

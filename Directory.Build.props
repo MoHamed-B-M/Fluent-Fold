@@ -1,0 +1,6 @@
+<Project>
+  <ItemGroup>
+    <Analyzer Include="C:\Users\Admin\Documents\winui3\Sorty\FluentFoldwinui3\FluentFold\.opencode\skills\winui-dev-workflow\analyzer\Microsoft.WindowsAppSDK.Analyzers.dll" />
+  </ItemGroup>
+  <Import Project="C:\Users\Admin\Documents\winui3\Sorty\FluentFoldwinui3\FluentFold\.opencode\skills\winui-dev-workflow\analyzer\Microsoft.WindowsAppSDK.Analyzers.targets" />
+</Project>

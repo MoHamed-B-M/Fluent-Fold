@@ -77,7 +77,7 @@ public sealed class UpdateService : IUpdateService, IDisposable
         try
         {
             var ver = Assembly.GetExecutingAssembly().GetName().Version;
-            return ver is not null ? $"{ver.Major}.{ver.Minor}.{ver.Build}" : "1.0.0";
+            return ver is not null ? $"{ver.Major}.{ver.Minor}.{ver.Build}" : "1.1.0";
         }
         catch
         {

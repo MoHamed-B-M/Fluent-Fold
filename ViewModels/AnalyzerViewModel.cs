@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
@@ -14,6 +15,7 @@ public sealed partial class AnalyzerViewModel : ObservableObject
     private readonly IAnalyzerService _analyzer;
     private readonly ILogger<AnalyzerViewModel> _logger;
     private CancellationTokenSource? _cts;
+    private readonly Stopwatch _stopwatch = new();
 
     public AnalyzerViewModel(IAnalyzerService analyzer, ILogger<AnalyzerViewModel> logger)
     {
@@ -25,7 +27,6 @@ public sealed partial class AnalyzerViewModel : ObservableObject
     public ObservableCollection<AnalyzerItem> TempItems { get; } = new();
     public ObservableCollection<AnalyzerItem> CacheItems { get; } = new();
     public ObservableCollection<AnalyzerItem> DuplicateItems { get; } = new();
-    public ObservableCollection<DashboardCard> DashboardCards { get; } = new();
 
 #pragma warning disable MVVMTK0045
     [ObservableProperty]
@@ -54,6 +55,7 @@ public sealed partial class AnalyzerViewModel : ObservableObject
     private string _totalReclaimable = string.Empty;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(EmptyResultsVisibility))]
     private int _totalItems;
 
     [ObservableProperty]
@@ -77,12 +79,15 @@ public sealed partial class AnalyzerViewModel : ObservableObject
     public string DuplicateSizeText => FormatHelper.FormatSize(DuplicateSize);
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(TempCardVisibility))]
     private int _tempCount;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CacheCardVisibility))]
     private int _cacheCount;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(DuplicateCardVisibility))]
     private int _duplicateCount;
 
     [ObservableProperty]
@@ -100,7 +105,21 @@ public sealed partial class AnalyzerViewModel : ObservableObject
     public Visibility IdleVisibility => IsIdle ? Visibility.Visible : Visibility.Collapsed;
     public Visibility ScanningVisibility => IsScanning ? Visibility.Visible : Visibility.Collapsed;
     public Visibility ResultsVisibility => HasResults ? Visibility.Visible : Visibility.Collapsed;
+    public Visibility EmptyResultsVisibility => HasResults && TotalItems == 0 ? Visibility.Visible : Visibility.Collapsed;
+    public Visibility TempCardVisibility => TempCount > 0 ? Visibility.Visible : Visibility.Collapsed;
+    public Visibility CacheCardVisibility => CacheCount > 0 ? Visibility.Visible : Visibility.Collapsed;
+    public Visibility DuplicateCardVisibility => DuplicateCount > 0 ? Visibility.Visible : Visibility.Collapsed;
     public string ProgressPercent => IsScanning ? $"Scanning: {(int)(ScanProgress * 100)}%" : string.Empty;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ProgressTimeText))]
+    private string _elapsedText = string.Empty;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ProgressTimeText))]
+    private string _remainingText = string.Empty;
+
+    public string ProgressTimeText => $"Elapsed: {ElapsedText} · Estimated remaining: {RemainingText}";
 
     [RelayCommand]
     private async Task StartScanAsync()
@@ -131,10 +150,11 @@ public sealed partial class AnalyzerViewModel : ObservableObject
 
         try
         {
-            var progress = new Progress<double>(p => ScanProgress = p * 0.85);
-            var results = await _analyzer.ScanAsync(progress, ct);
+            _stopwatch.Restart();
+            var progress = new Progress<double>(p => OnScanProgress(p));
+            var results = await Task.Run(async () => await _analyzer.ScanAsync(progress, ct));
 
-            ScanProgress = 0.85;
+            ScanProgress = 1.0;
 
             foreach (var item in results.OrderByDescending(i => i.Size))
                 Items.Add(item);
@@ -146,8 +166,8 @@ public sealed partial class AnalyzerViewModel : ObservableObject
 
             PopulateCategoryGroups(results);
 
-            ScanProgress = 1.0;
             HasResults = true;
+            _stopwatch.Stop();
             _logger.LogInformation("Scan complete: {Count} items, {Size} total", results.Count, totalBytes);
         }
         catch (OperationCanceledException)
@@ -166,10 +186,25 @@ public sealed partial class AnalyzerViewModel : ObservableObject
         }
     }
 
+    private void OnScanProgress(double p)
+    {
+        ScanProgress = p;
+
+        var elapsed = _stopwatch.Elapsed;
+        double remainingSeconds = p > 0.02 ? elapsed.TotalSeconds * (1 - p) / p : 0;
+        ElapsedText = FormatDuration(elapsed);
+        RemainingText = remainingSeconds > 0 ? FormatDuration(TimeSpan.FromSeconds(remainingSeconds)) : "—";
+    }
+
+    private static string FormatDuration(TimeSpan t)
+    {
+        return t.TotalMinutes >= 1
+            ? $"{(int)t.TotalMinutes}m {t.Seconds}s"
+            : $"{t.Seconds}s";
+    }
+
     private void PopulateCategoryGroups(List<AnalyzerItem> results)
     {
-        DashboardCards.Clear();
-
         foreach (var item in results)
         {
             switch (item.Category)
@@ -196,25 +231,6 @@ public sealed partial class AnalyzerViewModel : ObservableObject
                     break;
             }
         }
-
-        AddDashboardCard("Temporary Files", "\uE71B", TempCount, TempSizeText, TempPercent, TempItems);
-        AddDashboardCard("Cache Files", "\uE7C1", CacheCount, CacheSizeText, CachePercent, CacheItems);
-        AddDashboardCard("Duplicate Files", "\uE8A1", DuplicateCount, DuplicateSizeText, DuplicatePercent, DuplicateItems);
-    }
-
-    private void AddDashboardCard(string title, string icon, int count, string sizeFormatted, double percent, ObservableCollection<AnalyzerItem> items)
-    {
-        if (count <= 0) return;
-
-        DashboardCards.Add(new DashboardCard
-        {
-            Title = title,
-            Icon = icon,
-            Count = count,
-            SizeFormatted = sizeFormatted,
-            Percent = percent,
-            Items = items
-        });
     }
 
     [RelayCommand]
@@ -235,6 +251,30 @@ public sealed partial class AnalyzerViewModel : ObservableObject
     {
         foreach (var item in Items)
             item.IsSelected = false;
+    }
+
+    [RelayCommand]
+    private void ToggleTempSelection()
+    {
+        var allSelected = TempItems.Count > 0 && TempItems.All(i => i.IsSelected);
+        foreach (var item in TempItems)
+            item.IsSelected = !allSelected;
+    }
+
+    [RelayCommand]
+    private void ToggleCacheSelection()
+    {
+        var allSelected = CacheItems.Count > 0 && CacheItems.All(i => i.IsSelected);
+        foreach (var item in CacheItems)
+            item.IsSelected = !allSelected;
+    }
+
+    [RelayCommand]
+    private void ToggleDuplicateSelection()
+    {
+        var allSelected = DuplicateItems.Count > 0 && DuplicateItems.All(i => i.IsSelected);
+        foreach (var item in DuplicateItems)
+            item.IsSelected = !allSelected;
     }
 
     [RelayCommand]
@@ -312,14 +352,5 @@ public sealed partial class AnalyzerViewModel : ObservableObject
         HasResults = Items.Count > 0;
         if (!HasResults)
             IsIdle = true;
-        RebuildDashboardCards();
-    }
-
-    private void RebuildDashboardCards()
-    {
-        DashboardCards.Clear();
-        AddDashboardCard("Temporary Files", "\uE71B", TempCount, TempSizeText, TempPercent, TempItems);
-        AddDashboardCard("Cache Files", "\uE7C1", CacheCount, CacheSizeText, CachePercent, CacheItems);
-        AddDashboardCard("Duplicate Files", "\uE8A1", DuplicateCount, DuplicateSizeText, DuplicatePercent, DuplicateItems);
     }
 }

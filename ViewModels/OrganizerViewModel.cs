@@ -58,12 +58,14 @@ public sealed partial class OrganizerViewModel : ObservableObject
     [ObservableProperty]
     private string _selectedFolderPath = string.Empty;
 
-    [ObservableProperty]
+        [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ShowSelectButton))]
     [NotifyPropertyChangedFor(nameof(FolderSelectedVisibility))]
+    [NotifyPropertyChangedFor(nameof(EmptyFolderVisibility))]
     private bool _hasFolder;
 
     public Visibility FolderSelectedVisibility => HasFolder ? Visibility.Visible : Visibility.Collapsed;
+    public Visibility EmptyFolderVisibility => HasFolder && Files.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ProgressPercent))]
@@ -171,10 +173,15 @@ public sealed partial class OrganizerViewModel : ObservableObject
     private int _newTriggerTypeIndex;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ProVisibility))]
     private bool _isProMode = true;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(StandardVisibility))]
     private bool _isStandardMode;
+
+    public Visibility StandardVisibility => IsStandardMode ? Visibility.Visible : Visibility.Collapsed;
+    public Visibility ProVisibility => IsProMode ? Visibility.Visible : Visibility.Collapsed;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsListView))]
@@ -600,6 +607,7 @@ public sealed partial class OrganizerViewModel : ObservableObject
         finally
         {
             IsWorking = false;
+            OnPropertyChanged(nameof(EmptyFolderVisibility));
         }
     }
 

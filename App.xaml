@@ -9,19 +9,36 @@
                 <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
             </ResourceDictionary.MergedDictionaries>
 
+            <!-- ── Theme dictionaries (Light / Dark / High Contrast) ── -->
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key="Light">
+                    <SolidColorBrush x:Key="ScrimFillBrush" Color="#66000000" />
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="Dark">
+                    <SolidColorBrush x:Key="ScrimFillBrush" Color="#99000000" />
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="HighContrast">
+                    <SolidColorBrush x:Key="ScrimFillBrush" Color="#FF000000" />
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
+
+            <!-- ── Corner radius tokens ── -->
+            <CornerRadius x:Key="HeroCardCornerRadius">16</CornerRadius>
+            <CornerRadius x:Key="ControlCornerRadiusLarge">12</CornerRadius>
+
             <!-- ── Fluent Card (base for all card surfaces) ── -->
             <Style x:Key="FluentCardStyle" TargetType="Border">
                 <Setter Property="Background" Value="{ThemeResource CardBackgroundFillColorDefault}" />
                 <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefault}" />
                 <Setter Property="BorderThickness" Value="1" />
-                <Setter Property="CornerRadius" Value="12" />
+                <Setter Property="CornerRadius" Value="{ThemeResource ControlCornerRadiusLarge}" />
                 <Setter Property="Padding" Value="20" />
             </Style>
 
             <!-- ── Dashboard Card (analyzer results, acrylic + shadow) ── -->
             <Style x:Key="DashboardCardStyle" TargetType="Border">
                 <Setter Property="Background" Value="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}" />
-                <Setter Property="CornerRadius" Value="12" />
+                <Setter Property="CornerRadius" Value="{ThemeResource ControlCornerRadiusLarge}" />
                 <Setter Property="Padding" Value="20" />
             </Style>
 
@@ -30,7 +47,7 @@
                 <Setter Property="Background" Value="{ThemeResource CardBackgroundFillColorDefault}" />
                 <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefault}" />
                 <Setter Property="BorderThickness" Value="1" />
-                <Setter Property="CornerRadius" Value="12" />
+                <Setter Property="CornerRadius" Value="{ThemeResource ControlCornerRadiusLarge}" />
                 <Setter Property="Padding" Value="24" />
             </Style>
 
@@ -39,7 +56,7 @@
                 <Setter Property="Background" Value="{ThemeResource CardBackgroundFillColorDefault}" />
                 <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefault}" />
                 <Setter Property="BorderThickness" Value="1" />
-                <Setter Property="CornerRadius" Value="16" />
+                <Setter Property="CornerRadius" Value="{ThemeResource HeroCardCornerRadius}" />
                 <Setter Property="Padding" Value="40,48" />
                 <Setter Property="MaxWidth" Value="540" />
                 <Setter Property="HorizontalAlignment" Value="Center" />
@@ -50,7 +67,7 @@
                 <Setter Property="Background" Value="{ThemeResource CardBackgroundFillColorDefault}" />
                 <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefault}" />
                 <Setter Property="BorderThickness" Value="1" />
-                <Setter Property="CornerRadius" Value="12" />
+                <Setter Property="CornerRadius" Value="{ThemeResource ControlCornerRadiusLarge}" />
                 <Setter Property="Padding" Value="16,12" />
             </Style>
 
@@ -60,7 +77,7 @@
                 <Setter Property="Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}" />
                 <Setter Property="BorderThickness" Value="1" />
                 <Setter Property="BorderBrush" Value="Transparent" />
-                <Setter Property="CornerRadius" Value="8" />
+                <Setter Property="CornerRadius" Value="{ThemeResource ControlCornerRadius}" />
                 <Setter Property="Width" Value="40" />
                 <Setter Property="Height" Value="40" />
                 <Setter Property="FontFamily" Value="{ThemeResource SymbolThemeFontFamily}" />
@@ -70,11 +87,11 @@
             <!-- ── Hero Start Button ── -->
             <Style x:Key="HeroStartButtonStyle" TargetType="Button">
                 <Setter Property="Background" Value="{ThemeResource SystemAccentColor}" />
-                <Setter Property="Foreground" Value="White" />
+                <Setter Property="Foreground" Value="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
                 <Setter Property="FontFamily" Value="{ThemeResource SymbolThemeFontFamily}" />
                 <Setter Property="FontSize" Value="28" />
                 <Setter Property="Height" Value="64" />
-                <Setter Property="CornerRadius" Value="16" />
+                <Setter Property="CornerRadius" Value="{ThemeResource HeroCardCornerRadius}" />
                 <Setter Property="HorizontalAlignment" Value="Stretch" />
             </Style>
 
