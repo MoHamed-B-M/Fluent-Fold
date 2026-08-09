@@ -114,7 +114,7 @@ public sealed partial class SettingsViewModel : ObservableObject
             DefaultOrganizationMode = "Move";
             KeepFolderStructure = false;
             ThemePreference = "System";
-            ShowTeachingTips = true;
+            ShowTeachingTips = false;
             AppMode = "Pro";
             UseRecycleBin = true;
             AutoCheckUpdates = true;
@@ -159,7 +159,7 @@ public sealed partial class SettingsViewModel : ObservableObject
         DefaultOrganizationMode = "Move";
         KeepFolderStructure = false;
         ThemePreference = "System";
-        ShowTeachingTips = true;
+        ShowTeachingTips = false;
         AppMode = "Pro";
         UseRecycleBin = true;
         AutoCheckUpdates = true;

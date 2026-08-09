@@ -183,7 +183,7 @@ public sealed class AppSettingsService : IAppSettingsService, IDisposable
 
     public bool ShowTeachingTips
     {
-        get => Get(nameof(ShowTeachingTips), true);
+        get => Get(nameof(ShowTeachingTips), false);
         set => Set(nameof(ShowTeachingTips), value);
     }
 

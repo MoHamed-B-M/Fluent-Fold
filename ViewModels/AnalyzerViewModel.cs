@@ -111,13 +111,31 @@ public sealed partial class AnalyzerViewModel : ObservableObject
     public Visibility DuplicateCardVisibility => DuplicateCount > 0 ? Visibility.Visible : Visibility.Collapsed;
     public string ProgressPercent => IsScanning ? $"Scanning: {(int)(ScanProgress * 100)}%" : string.Empty;
 
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ProgressTimeText))]
     private string _elapsedText = string.Empty;
+    public string ElapsedText
+    {
+        get => _elapsedText;
+        set
+        {
+            if (_elapsedText == value) return;
+            _elapsedText = value;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(ProgressTimeText));
+        }
+    }
 
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ProgressTimeText))]
     private string _remainingText = string.Empty;
+    public string RemainingText
+    {
+        get => _remainingText;
+        set
+        {
+            if (_remainingText == value) return;
+            _remainingText = value;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(ProgressTimeText));
+        }
+    }
 
     public string ProgressTimeText => $"Elapsed: {ElapsedText} · Estimated remaining: {RemainingText}";
 
