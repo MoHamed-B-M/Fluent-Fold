@@ -17,7 +17,7 @@
   <Properties>
     <DisplayName>FluentFold</DisplayName>
     <PublisherDisplayName>Hamma</PublisherDisplayName>
-    <Logo>Assets\logo.png</Logo>
+    <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
 
   <Dependencies>
@@ -37,9 +37,10 @@
         DisplayName="FluentFold"
         Description="FluentFold"
         BackgroundColor="transparent"
-        Square150x150Logo="Assets\logo.png"
-        Square44x44Logo="Assets\logo.png">
-        <uap:SplashScreen Image="Assets\logo.png" />
+        Square150x150Logo="Assets\Square150x150Logo.png"
+        Square71x71Logo="Assets\Square71x71Logo.png"
+        Square44x44Logo="Assets\Square44x44Logo.png">
+        <uap:SplashScreen Image="Assets\SplashScreen.png" />
       </uap:VisualElements>
     </Application>
   </Applications>
