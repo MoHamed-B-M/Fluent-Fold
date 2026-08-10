@@ -8,6 +8,7 @@ using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Windowing;
 using FluentFold.Services;
 using FluentFold.ViewModels;
+using FluentFold.Views;
 using WinRT.Interop;
 
 namespace FluentFold;
@@ -48,6 +49,7 @@ public sealed partial class MainWindow : Window
         ViewModel.Initialize(ContentFrame);
         await Task.Delay(200);
         ShowOnboarding();
+        _ = CheckWhatsNewAfterUpdateAsync();
         _ = CheckForUpdatesAsync();
     }
 
@@ -125,10 +127,39 @@ public sealed partial class MainWindow : Window
         public static extern IntPtr LoadImage(IntPtr hInst, string name, uint type, int cx, int cy, uint fuLoad);
     }
 
+    private async Task CheckWhatsNewAfterUpdateAsync()
+    {
+        try
+        {
+            if (_firstLaunch.IsFirstLaunch) return;
+            var version = AppInfo.CurrentVersion;
+            if (_settings.LastSeenVersion == version) return;
+            _settings.LastSeenVersion = version;
+            await Task.Delay(400);
+            await ShowWhatsNewDialogAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning("What's New check failed: {Ex}", ex.Message);
+        }
+    }
+
+    private async Task ShowWhatsNewDialogAsync()
+    {
+        try
+        {
+            var dialog = new WhatsNewDialog { XamlRoot = Content.XamlRoot };
+            await dialog.ShowAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning("What's New dialog failed: {Ex}", ex.Message);
+        }
+    }
+
     public void ShowOnboarding()
     {
         if (!_firstLaunch.IsFirstLaunch) return;
-        if (!_settings.ShowTeachingTips) return;
         _onboardSlide = 0;
         ShowSlide(0);
         OnboardingOverlayElement.Visibility = Visibility.Visible;
@@ -141,6 +172,8 @@ public sealed partial class MainWindow : Window
         if (PinToTaskbarToggle.IsOn) TryPinToTaskbar();
         _firstLaunch.MarkCompleted();
         OnboardingOverlayElement.Visibility = Visibility.Collapsed;
+        _settings.LastSeenVersion = AppInfo.CurrentVersion;
+        _ = ShowWhatsNewDialogAsync();
     }
 
     private void TryPinToTaskbar()

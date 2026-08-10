@@ -45,3 +45,5 @@ skills-lock.json
 
 # Inno Setup output
 _r2/
+
+.opencode/

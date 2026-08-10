@@ -3,8 +3,9 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d">
+xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+     mc:Ignorable="d"
+     xmlns:views="using:FluentFold.Views">
 
     <Grid Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}" Padding="24">
         <ScrollViewer>
@@ -33,57 +34,12 @@
                             <Border Grid.Column="2" Background="{ThemeResource SystemAccentColor}"
                                     CornerRadius="{ThemeResource ControlCornerRadius}" Padding="10,4"
                                     VerticalAlignment="Center">
-                                <TextBlock Text="1.1.0-beta" FontWeight="SemiBold" FontSize="12"
+                                <TextBlock Text="1.1.0" FontWeight="SemiBold" FontSize="12"
                                            Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
                             </Border>
                         </Grid>
 
-                        <Border Background="{ThemeResource CardBackgroundFillColorSecondary}"
-                                CornerRadius="{ThemeResource ControlCornerRadius}" Padding="16,4">
-                            <StackPanel Spacing="10">
-                                <TextBlock Text="Organizer" Style="{StaticResource CaptionTextBlockStyle}"
-                                           Foreground="{ThemeResource SystemAccentColor}" Margin="0,6,0,0" />
-                                <TextBlock TextWrapping="Wrap" FontSize="14" LineHeight="20">
-                                    <Run Text="&#xE73E;" FontFamily="{ThemeResource SymbolThemeFontFamily}" />  Redesigned the Organizer screen with a new hero layout, stat cards, and empty states.
-                                </TextBlock>
-                                <TextBlock TextWrapping="Wrap" FontSize="14" LineHeight="20">
-                                    <Run Text="&#xE73E;" FontFamily="{ThemeResource SymbolThemeFontFamily}" />  Added guided teaching tips for first-time users, dismissible with light dismiss.
-                                </TextBlock>
-                                <TextBlock TextWrapping="Wrap" FontSize="14" LineHeight="20">
-                                    <Run Text="&#xE73E;" FontFamily="{ThemeResource SymbolThemeFontFamily}" />  Folder picker now uses a stable window handle so the picker opens every time.
-                                </TextBlock>
-
-                                <TextBlock Text="Analyzer" Style="{StaticResource CaptionTextBlockStyle}"
-                                           Foreground="{ThemeResource SystemAccentColor}" Margin="0,6,0,0" />
-                                <TextBlock TextWrapping="Wrap" FontSize="14" LineHeight="20">
-                                    <Run Text="&#xE73E;" FontFamily="{ThemeResource SymbolThemeFontFamily}" />  Progress is now real — no more fake percentage cap — with elapsed and estimated time remaining.
-                                </TextBlock>
-                                <TextBlock TextWrapping="Wrap" FontSize="14" LineHeight="20">
-                                    <Run Text="&#xE73E;" FontFamily="{ThemeResource SymbolThemeFontFamily}" />  Results split into independent cards for Temporary, Cache, and Duplicate files.
-                                </TextBlock>
-                                <TextBlock TextWrapping="Wrap" FontSize="14" LineHeight="20">
-                                    <Run Text="&#xE73E;" FontFamily="{ThemeResource SymbolThemeFontFamily}" />  Select All available in every category card; scanning no longer freezes the app.
-                                </TextBlock>
-                                <TextBlock TextWrapping="Wrap" FontSize="14" LineHeight="20">
-                                    <Run Text="&#xE73E;" FontFamily="{ThemeResource SymbolThemeFontFamily}" />  Scan progress now surfaces fine-grained updates, including the duplicate-hashing phase.
-                                </TextBlock>
-                                <TextBlock TextWrapping="Wrap" FontSize="14" LineHeight="20">
-                                    <Run Text="&#xE73E;" FontFamily="{ThemeResource SymbolThemeFontFamily}" />  Cleaner scanning card: replaced the progress bar with a single loading indicator.
-                                </TextBlock>
-
-                                <TextBlock Text="General" Style="{StaticResource CaptionTextBlockStyle}"
-                                           Foreground="{ThemeResource SystemAccentColor}" Margin="0,6,0,0" />
-                                <TextBlock TextWrapping="Wrap" FontSize="14" LineHeight="20">
-                                    <Run Text="&#xE73E;" FontFamily="{ThemeResource SymbolThemeFontFamily}" />  Full Fluent design pass: light/dark/high-contrast tokens, accent contrast, and larger corner radii.
-                                </TextBlock>
-                                <TextBlock TextWrapping="Wrap" FontSize="14" LineHeight="20">
-                                    <Run Text="&#xE73E;" FontFamily="{ThemeResource SymbolThemeFontFamily}" />  Accessibility improvements: automation names and IDs on all interactive controls.
-                                </TextBlock>
-                                <TextBlock TextWrapping="Wrap" FontSize="14" LineHeight="20">
-                                    <Run Text="&#xE73E;" FontFamily="{ThemeResource SymbolThemeFontFamily}" />  Brand-new app logo across the store listing, Start menu, and splash screen.
-                                </TextBlock>
-                            </StackPanel>
-                        </Border>
+                        <views:WhatsNewView />
                     </StackPanel>
                 </Border>
 

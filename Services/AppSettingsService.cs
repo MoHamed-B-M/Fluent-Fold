@@ -205,6 +205,12 @@ public sealed class AppSettingsService : IAppSettingsService, IDisposable
         set => Set(nameof(HasCompletedFirstLaunch), value);
     }
 
+    public string LastSeenVersion
+    {
+        get => Get(nameof(LastSeenVersion), string.Empty);
+        set => Set(nameof(LastSeenVersion), value);
+    }
+
     public double WindowWidth
     {
         get => Get(nameof(WindowWidth), 1200.0);

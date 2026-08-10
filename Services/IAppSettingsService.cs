@@ -33,4 +33,6 @@ public interface IAppSettingsService
     string SortMode { get; set; }
     /// <summary>Whether to automatically check for updates on startup.</summary>
     bool AutoCheckUpdates { get; set; }
+    /// <summary>The last app version the What's New dialog was shown for.</summary>
+    string LastSeenVersion { get; set; }
 }
