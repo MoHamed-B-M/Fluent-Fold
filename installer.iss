@@ -2,7 +2,7 @@
 ; Run with: iscc installer.iss /dPublishDir=...\publish
 
 #define MyAppName "FluentFold"
-#define MyAppVersion "1.1.0.1"
+#define MyAppVersion "1.1.1.0"
 #define MyAppPublisher "AppPublisher"
 #define MyAppURL "https://github.com/MoHamed-B-M/Fluent-Fold"
 #define MyAppExeName "FluentFold.exe"

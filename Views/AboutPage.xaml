@@ -34,7 +34,7 @@ xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                             <Border Grid.Column="2" Background="{ThemeResource SystemAccentColor}"
                                     CornerRadius="{ThemeResource ControlCornerRadius}" Padding="10,4"
                                     VerticalAlignment="Center">
-                                <TextBlock Text="1.1.0.1" FontWeight="SemiBold" FontSize="12"
+                                <TextBlock Text="1.1.1" FontWeight="SemiBold" FontSize="12"
                                            Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
                             </Border>
                         </Grid>
