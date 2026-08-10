@@ -8,11 +8,8 @@
     mc:Ignorable="d"
     Title="What's New"
     CloseButtonText="Got it"
-    DefaultButton="Close">
-
-    <ContentDialog.Resources>
-        <CornerRadius x:Key="OverlayCornerRadius">16</CornerRadius>
-    </ContentDialog.Resources>
+    DefaultButton="Close"
+    CornerRadius="24">
 
     <ScrollViewer MaxHeight="420" VerticalScrollBarVisibility="Auto">
         <views:WhatsNewView />
