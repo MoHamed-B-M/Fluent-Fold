@@ -10,6 +10,10 @@
     CloseButtonText="Got it"
     DefaultButton="Close">
 
+    <ContentDialog.Resources>
+        <CornerRadius x:Key="OverlayCornerRadius">16</CornerRadius>
+    </ContentDialog.Resources>
+
     <ScrollViewer MaxHeight="420" VerticalScrollBarVisibility="Auto">
         <views:WhatsNewView />
     </ScrollViewer>

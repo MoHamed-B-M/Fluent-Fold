@@ -37,7 +37,6 @@ public sealed partial class MainWindow : Window
         var ws = (WindowService)serviceProvider.GetRequiredService<IWindowService>();
         ws.WindowHandle = WindowNative.GetWindowHandle(this);
 
-        RestoreWindowPosition();
         Activated += OnActivated;
         Closed += OnClosed;
     }
@@ -45,6 +44,8 @@ public sealed partial class MainWindow : Window
     private async void OnActivated(object sender, WindowActivatedEventArgs e)
     {
         Activated -= OnActivated;
+        RestoreWindowPosition();
+        ReenableWindowAnimations();
         SetAppIcon();
         ViewModel.Initialize(ContentFrame);
         await Task.Delay(200);
@@ -125,6 +126,9 @@ public sealed partial class MainWindow : Window
 
         [DllImport("user32.dll")]
         public static extern IntPtr LoadImage(IntPtr hInst, string name, uint type, int cx, int cy, uint fuLoad);
+
+        [DllImport("dwmapi.dll")]
+        public static extern int DwmSetWindowAttribute(IntPtr hwnd, int attribute, ref int pvAttribute, int cbAttribute);
     }
 
     private async Task CheckWhatsNewAfterUpdateAsync()
@@ -258,6 +262,21 @@ public sealed partial class MainWindow : Window
     {
         try { return (Brush)Application.Current.Resources[key]; }
         catch { return new SolidColorBrush(fallback); }
+    }
+
+    private void ReenableWindowAnimations()
+    {
+        try
+        {
+            const int DwmwaTransitionsForcedisabled = 3;
+            int enabled = 0;
+            var hwnd = WindowNative.GetWindowHandle(this);
+            NativeMethods.DwmSetWindowAttribute(hwnd, DwmwaTransitionsForcedisabled, ref enabled, sizeof(int));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning("Re-enabling window animations failed: {Ex}", ex.Message);
+        }
     }
 
     private void RestoreWindowPosition()
